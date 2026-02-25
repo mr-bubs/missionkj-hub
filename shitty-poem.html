@@ -15,15 +15,21 @@
             margin: 0;
             padding: 0;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
             overflow: hidden; /* Prevents scroll on lock screen */
         }
         
         .hidden { display: none !important; }
         .fade-out { opacity: 0; transition: opacity 0.5s ease-out; }
 
-        /* --- TOP STATUS BAR (Like the reference image) --- */
+        /* --- THE MAIN UI WRAPPER --- */
+        #main-ui {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- TOP STATUS BAR --- */
         .status-bar {
             width: 100%;
             display: flex;
@@ -41,7 +47,7 @@
         .status-time { font-weight: 500; font-size: 15px; }
         .status-right i { margin-left: 5px; }
 
-        /* --- THE SHERLOCK LAYOUT --- */
+        /* --- THE SHERLOCK LAYOUT (Perfectly Centered) --- */
         #lock-screen {
             flex-grow: 1;
             display: flex;
@@ -49,8 +55,6 @@
             align-items: center;
             justify-content: center;
             width: 100%;
-            /* Offset slightly upward so the keyboard doesn't hide it on mobile */
-            padding-bottom: 10vh; 
             cursor: pointer; /* Lets them tap anywhere to type */
         }
 
@@ -82,7 +86,6 @@
             align-items: center;
             justify-content: center;
             border: 3px solid transparent;
-            text-transform: lowercase;
         }
 
         /* The blue highlight for the active box */
@@ -90,7 +93,7 @@
             border-color: #3399ff; 
         }
 
-        /* The actual input field is hidden to make mobile typing perfectly smooth */
+        /* The actual input field is hidden */
         #hidden-input {
             position: absolute;
             opacity: 0;
@@ -186,7 +189,6 @@
         </div>
     </div>
 
-
     <div id="poem-view" class="hidden">
         <div id="poem-box">
             <h1>[ Shitty poem ]</h1>
@@ -233,9 +235,15 @@
         hiddenInput.addEventListener('input', function() {
             const val = this.value;
 
-            // Fill the boxes with typed letters and update the blue border
             for (let i = 0; i < 4; i++) {
-                boxes[i].innerText = val[i] ? val[i] : '';
+                // Determine what character to show in the box
+                if (i < val.length - 1) {
+                    boxes[i].innerText = '*'; // Mask previous letters
+                } else if (i === val.length - 1) {
+                    boxes[i].innerText = val[i].toUpperCase(); // Show current letter in caps
+                } else {
+                    boxes[i].innerText = ''; // Empty box
+                }
                 
                 // Move the blue border to the current box
                 if (i === val.length) {
@@ -249,11 +257,14 @@
 
             // Check password when 4 letters are typed
             if (val.length === 4) {
-                if (val.toLowerCase() === correctPassword) {
-                    setTimeout(unlockPhone, 150); // Tiny delay so they see the last letter
-                } else {
-                    setTimeout(wrongPassword, 150);
-                }
+                // Short delay so they can actually see the final typed letter before it verifies
+                setTimeout(() => {
+                    if (val.toLowerCase() === correctPassword) {
+                        unlockPhone();
+                    } else {
+                        wrongPassword();
+                    }
+                }, 250); 
             }
         });
 
@@ -280,6 +291,9 @@
         }
 
         function wrongPassword() {
+            // Instantly turn the final wrong letter into an asterisk before shaking
+            boxes[3].innerText = '*';
+            
             // Shake effect
             document.getElementById('box-container').classList.add('shake');
             setTimeout(() => {
