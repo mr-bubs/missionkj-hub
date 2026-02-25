@@ -15,7 +15,7 @@
             margin: 0;
             padding: 0;
             min-height: 100vh;
-            overflow: hidden; /* Prevents scroll on lock screen */
+            overflow: hidden; 
         }
         
         .hidden { display: none !important; }
@@ -47,7 +47,7 @@
         .status-time { font-weight: 500; font-size: 15px; }
         .status-right i { margin-left: 5px; }
 
-        /* --- THE SHERLOCK LAYOUT (Perfectly Centered) --- */
+        /* --- THE SHERLOCK LAYOUT --- */
         #lock-screen {
             flex-grow: 1;
             display: flex;
@@ -55,15 +55,15 @@
             align-items: center;
             justify-content: center;
             width: 100%;
-            cursor: pointer; /* Lets them tap anywhere to type */
+            cursor: pointer; 
         }
 
         .sherlock-text {
-            font-family: 'Impact', 'Arial Black', sans-serif; /* Big, chunky font */
+            font-family: 'Impact', 'Arial Black', sans-serif; 
             font-size: 70px;
             font-weight: bold;
             letter-spacing: 4px;
-            color: #dcdcdc; /* Slightly muted white/grey */
+            color: #dcdcdc; 
             margin: 10px 0;
             text-transform: uppercase;
         }
@@ -71,7 +71,7 @@
         /* --- THE PASSCODE SQUARES --- */
         .passcode-row {
             display: flex;
-            gap: 15px; /* Space between boxes */
+            gap: 15px; 
             margin: 20px 0;
         }
 
@@ -88,19 +88,14 @@
             border: 3px solid transparent;
         }
 
-        /* The blue highlight for the active box */
-        .box.active {
-            border-color: #3399ff; 
-        }
+        .box.active { border-color: #3399ff; }
 
-        /* The actual input field is hidden */
         #hidden-input {
             position: absolute;
             opacity: 0;
             top: -1000px;
         }
 
-        /* Error shake animation */
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-10px); }
@@ -109,7 +104,7 @@
         }
         .shake { animation: shake 0.4s ease-in-out; }
 
-        /* --- THE POEM CONTAINER (Book Style) --- */
+        /* --- THE POEM CONTAINER --- */
         #poem-view {
             background-color: #E6E0F8; 
             color: #1a1a1a;
@@ -121,7 +116,7 @@
             justify-content: center;
             padding: 40px 15px;
             box-sizing: border-box;
-            overflow-y: auto; 
+            overflow-y: hidden; /* Locked during decryption */
         }
 
         #poem-box {
@@ -144,6 +139,8 @@
             text-align: left;
             display: inline-block;
             margin: 0 auto;
+            word-wrap: break-word; /* Forces the raw encrypted text to fit the screen */
+            max-width: 100%;
         }
 
         .back-btn {
@@ -156,6 +153,42 @@
             font-family: 'Courier New', monospace;
             border-radius: 5px;
             margin-bottom: 40px;
+        }
+
+        /* --- THE DECRYPTION OVERLAY --- */
+        #decryption-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); /* Dark cinematic overlay */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: opacity 0.5s ease;
+        }
+
+        .decrypt-box {
+            border: 1px solid #00ff00;
+            background: rgba(0, 25, 0, 0.9);
+            padding: 20px 40px;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 20px;
+            font-weight: bold;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+            text-transform: uppercase;
+        }
+
+        .blinking-dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
         }
     </style>
 </head>
@@ -175,21 +208,26 @@
 
         <div id="lock-screen">
             <div class="sherlock-text">I'M</div>
-            
             <div class="passcode-row" id="box-container">
                 <div class="box" id="box1"></div>
                 <div class="box" id="box2"></div>
                 <div class="box" id="box3"></div>
                 <div class="box" id="box4"></div>
             </div>
-            
             <div class="sherlock-text">LOCKED</div>
-
             <input type="text" id="hidden-input" maxlength="4" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
         </div>
     </div>
 
+
     <div id="poem-view" class="hidden">
+        
+        <div id="decryption-overlay">
+            <div class="decrypt-box" id="overlay-text">
+                Decrypting<span class="blinking-dots"></span>
+            </div>
+        </div>
+
         <div id="poem-box">
             <h1>[ Shitty poem ]</h1>
             <div id="decrypted-text"></div>
@@ -205,7 +243,6 @@
         const correctPassword = "bubs"; 
         // -----------------------
 
-        // Update the tiny clock automatically
         function updateClock() {
             const now = new Date();
             const hours = now.getHours().toString().padStart(2, '0');
@@ -215,7 +252,6 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        // --- THE INVISIBLE KEYBOARD LOGIC ---
         const hiddenInput = document.getElementById('hidden-input');
         const boxes = [
             document.getElementById('box1'),
@@ -224,40 +260,34 @@
             document.getElementById('box4')
         ];
 
-        // Tapping anywhere on the black screen opens the keyboard
         document.getElementById('lock-screen').addEventListener('click', () => {
             hiddenInput.focus();
         });
 
-        // Initialize first box to have the blue active border
         boxes[0].classList.add('active');
 
         hiddenInput.addEventListener('input', function() {
             const val = this.value;
 
             for (let i = 0; i < 4; i++) {
-                // Determine what character to show in the box
                 if (i < val.length - 1) {
-                    boxes[i].innerText = '*'; // Mask previous letters
+                    boxes[i].innerText = '*'; 
                 } else if (i === val.length - 1) {
-                    boxes[i].innerText = val[i].toUpperCase(); // Show current letter in caps
+                    boxes[i].innerText = val[i].toUpperCase(); 
                 } else {
-                    boxes[i].innerText = ''; // Empty box
+                    boxes[i].innerText = ''; 
                 }
                 
-                // Move the blue border to the current box
                 if (i === val.length) {
                     boxes[i].classList.add('active');
                 } else if (val.length === 4 && i === 3) {
-                    boxes[i].classList.add('active'); // Keep last box active when full
+                    boxes[i].classList.add('active'); 
                 } else {
                     boxes[i].classList.remove('active');
                 }
             }
 
-            // Check password when 4 letters are typed
             if (val.length === 4) {
-                // Short delay so they can actually see the final typed letter before it verifies
                 setTimeout(() => {
                     if (val.toLowerCase() === correctPassword) {
                         unlockPhone();
@@ -272,17 +302,27 @@
             hiddenInput.blur(); 
             
             try {
-                // Decrypt
                 const decodedText = atob(secretData); 
-                document.getElementById('decrypted-text').innerHTML = decodedText;
+                const textBox = document.getElementById('decrypted-text');
                 
-                // Fade out UI, show poem
+                // Fade out Lock Screen
                 document.getElementById('main-ui').classList.add('fade-out');
+                
                 setTimeout(() => {
                     document.getElementById('main-ui').classList.add('hidden');
+                    
+                    // Show the Poem View with the Decryption Overlay active
                     document.getElementById('poem-view').classList.remove('hidden');
-                    document.body.style.overflow = "auto"; 
-                    document.body.style.backgroundColor = "#E6E0F8"; // Change background for scrolling
+                    document.body.style.backgroundColor = "#E6E0F8"; 
+                    
+                    // Step 1: Instantly show the raw base64 string
+                    textBox.innerText = secretData;
+                    
+                    // Step 2: After 1.5s, begin the matrix decryption effect
+                    setTimeout(() => {
+                        startDecryptionEffect(decodedText, textBox);
+                    }, 1500);
+
                 }, 500);
                 
             } catch (e) {
@@ -291,21 +331,79 @@
         }
 
         function wrongPassword() {
-            // Instantly turn the final wrong letter into an asterisk before shaking
             boxes[3].innerText = '*';
-            
-            // Shake effect
             document.getElementById('box-container').classList.add('shake');
             setTimeout(() => {
                 document.getElementById('box-container').classList.remove('shake');
-                hiddenInput.value = ''; // Clear input
-                // Reset visual boxes
+                hiddenInput.value = ''; 
                 boxes.forEach(box => {
                     box.innerText = '';
                     box.classList.remove('active');
                 });
-                boxes[0].classList.add('active'); // Reset blue border to start
+                boxes[0].classList.add('active'); 
             }, 400);
+        }
+
+        // --- THE MATRIX DECRYPTION ENGINE ---
+        function startDecryptionEffect(finalText, textBox) {
+            // Split into words and HTML tags
+            const tokens = finalText.split(/(<[^>]+>|\s+)/);
+            let currentIndex = 0;
+
+            const decryptInterval = setInterval(() => {
+                if (currentIndex >= tokens.length) {
+                    clearInterval(decryptInterval);
+                    
+                    // Finish Sequence
+                    const overlayText = document.getElementById('overlay-text');
+                    overlayText.innerHTML = "DECRYPTION COMPLETED";
+                    
+                    setTimeout(() => {
+                        const overlay = document.getElementById('decryption-overlay');
+                        overlay.style.opacity = '0'; 
+                        
+                        setTimeout(() => {
+                            overlay.classList.add('hidden');
+                            document.getElementById('poem-view').style.overflowY = "auto"; // Re-enable scrolling
+                            document.body.style.overflow = "auto";
+                        }, 500);
+                    }, 1200); // Hold the "Completed" message for a second
+                    
+                    return;
+                }
+
+                // Skip ahead instantly if it's a space or an HTML tag
+                if (tokens[currentIndex].match(/(<[^>]+>|\s+)/)) {
+                    currentIndex++;
+                    if (currentIndex >= tokens.length) return;
+                }
+
+                let revealed = tokens.slice(0, currentIndex + 1).join('');
+
+                // Generate structural gibberish for the unrevealed portion
+                let unrevealedHtml = "";
+                for (let j = currentIndex + 1; j < tokens.length; j++) {
+                    if (tokens[j].match(/(<[^>]+>|\s+)/)) {
+                        unrevealedHtml += tokens[j]; // Keep spaces and line breaks
+                    } else {
+                        unrevealedHtml += generateGibberish(tokens[j].length); // Scramble words
+                    }
+                }
+
+                // Display revealed text in normal color, gibberish slightly faded
+                textBox.innerHTML = revealed + '<span style="opacity: 0.3;">' + unrevealedHtml + '</span>';
+                
+                currentIndex++;
+            }, 50); // Speed of the word-by-word reveal (50ms)
+        }
+
+        function generateGibberish(length) {
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%";
+            let result = "";
+            for (let i = 0; i < length; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
         }
     </script>
 </body>
