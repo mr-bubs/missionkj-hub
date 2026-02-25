@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>Classified File</title>
+    <style>
+        /* Terminal Background */
+        body {
+            background-color: #0d0d0d;
+            color: #00ff00; /* Hacker Green */
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .hidden { display: none !important; }
+
+        /* The Login Box */
+        #login-box {
+            border: 1px solid #00ff00;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+        }
+
+        input[type="password"] {
+            background: #1a1a1a;
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            margin-top: 20px;
+            outline: none;
+            text-align: center;
+        }
+
+        button {
+            background: #00ff00;
+            color: #0d0d0d;
+            border: none;
+            padding: 10px 20px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.1s;
+        }
+
+        button:active { transform: scale(0.95); }
+        #error-msg { color: #ff3333; margin-top: 15px; font-size: 14px; }
+
+        /* The Poem Container (Looks like the soft purple GIF) */
+        #poem-container {
+            background-color: #E6E0F8; 
+            color: #1a1a1a;
+            font-family: 'Georgia', serif;
+            padding: 50px;
+            border-radius: 10px;
+            max-width: 600px;
+            text-align: center;
+            line-height: 1.8;
+            font-size: 18px;
+            box-shadow: 0 0 30px rgba(230, 224, 248, 0.2);
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-top: 40px;
+            padding: 10px 20px;
+            background-color: #1a1a1a;
+            color: white;
+            text-decoration: none;
+            font-family: 'Courier New', monospace;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-box">
+        <h2>MISSION KJ : SECURE ARCHIVE</h2>
+        <p>File: "Shitty_Poem.txt" is encrypted.</p>
+        <p>Enter Clearance Code to decrypt:</p>
+        <input type="password" id="passcode" placeholder="Code...">
+        <br>
+        <button onclick="checkCode()">DECRYPT FILE</button>
+        <p id="error-msg" class="hidden">ACCESS DENIED. INCORRECT CODE.</p>
+    </div>
+
+    <div id="poem-container" class="hidden">
+        <h1 style="font-family: 'Courier New', monospace;">[ Shitty poem ]</h1>
+        
+        <div id="decrypted-text"></div>
+        
+        <a href="/" class="back-btn">RETURN TO DATABASE</a>
+    </div>
+
+    <script>
+        // --- MISSION KJ SETTINGS ---
+
+        // 1. PASTE YOUR GIBBERISH HERE (Keep the quote marks!)
+        const secretData = "CkFuIGFwcGxlIGEgZGF5PGJyPgpLZWVwcyB0aGUgZG9jdG9yIGF3YXk8YnI+CidXaGVyZSBpcyBoZSBnb2luZyB3aXRoIHRoaXM/Jzxicj4KQXJlbid0IHlvdSB3b25kZXJpbmcsIEtheWpheT88YnI+CkFueXdheS48YnI+IAo8YnI+Ckl0J3MgZ2V0dGluZyBjb2xkZXIgZXZlcnlkYXk8YnI+ClNvIHNpcCBvbiBhIGhvdCBkcmluazxicj4KQW5kIGxldCBtZSB0aGluazxicj4KQ2F1c2UgSSdtIG9uIHRoZSBicmluay4uLjxicj4KLi4uZG9uJ3QgY2xpY2sgb24gYW55IHVua25vd24gbGluayhzKT88YnI+Ckhhbmcgb24sIGhhbmcgb24uPGJyPgpJJ2xsIHRyeSBhZ2Fpbi48YnI+CkEgcGFzdHJ5IGlzIGdvb2Q8YnI+CkJ1dCB0aGUgY2FrZSBjb3VjaCBpcyBiZXR0ZXI8YnI+CkhvdydzIHRoaXMgc2hpdHR5IHBvZW0/PGJyPgpGZWVscyBsaWtlIGEgdHJlbmQgc2V0dGVyLjxicj4KPGJyPgpBbHNvLCBjb25zaWRlciB0aGlzIHNoaXR0eSBwb2VtIGEgbGF0ZSBiZGF5IGdpZnQ8YnI+CkNhdXNlIEkgZGlkbid0IGdpdmUgYW55IG9uIHRoZSBhY3R1YWwgZGF0ZS48YnI+Ck9jdG9iZXIgMTZ0aCwgdG8gYmUgY2xlYXIuPGJyPgpPa2F5LCBkZWVyPzxicj4KKE5vdCBhIHR5cG8pPGJyPiAKPGJyPgpBbnl3YXksIElHSSBUZXJtaW5hbCAyIGlzIERvbWVzdGljLjxicj4KQ2FuIHlvdSBndWVzcyB3aGVyZSBJJ20gZ29pbmcgd2l0aCB0aGlzIG9uZT88YnI+Ck5vPzxicj4KTUFKRVNUSUMuPGJyPgooSGV5IGF0IGxlYXN0IEkgdHJpZWQsIHlvdSB0cnkgcmh5bWluZyBzb21ldGhpbmcgd2l0aCBNYWplc3RpYykuPGJyPgo8YnI+CkJ1dCBzZXJpb3VzbHksPGJyPgpJIGp1c3QgaG9wZSB0aGlzIG1ha2VzIHlvdSBzbWlsZSwgcmVhbGx5PGJyPgpBbmQgbWFrZXMgdGhpcyBkdWxsIHdvcmxkIGEgYml0IGJyaWdodGVyLjxicj4KTGlrZSB0aGUgc3VuPzxicj4KT3IgYSByZWFsbHkgaGlnaCBxdWFsaXR5IGxpZ2h0ZXI/PGJyPgooT2theSwgY29tcGFyaW5nIHlvdSB0byBhIGxpZ2h0ZXIgaXMgd2VpcmQuPGJyPgpDb25zaWRlciB0aGF0IGxpbmUuLi4gZGlzYXBwZWFyZWQuKTxicj4KT2theSBpdCdzIGdldHRpbmcgY29uZnVzaW5nPGJyPgpBbmQgSSdtIGxvc2luZyBteSB3YXk8YnI+CldoYXQgSSdtIHRyeWluZyB0byBzYXk8YnI+CklzPGJyPgpLYXlqYXksIHlvdSBhcmUgY29vbC48YnI+CkFuZCBJJ20gYSBmb29sLjxicj4KQSBjdXRlIGZvb2w/PGJyPgpNYXliZT88YnI+Ck9rYXksIHRoaXMgcG9lbSBpcyBkb25lLjxicj4KSG9wZSB0aGlzIHdhcyBmdW4uPGJyPgpJZiBpdCB3YXNuJ3QsIEknbSBzb3JyeS48YnI+ClBsZWFzZSBkb24ndCBraWxsIG1lLjxicj4K"; 
+        
+        // 2. SET YOUR PASSWORD HERE (Keep it lowercase in the code)
+        const correctPassword = "1995"; 
+
+        // ---------------------------
+
+        function checkCode() {
+            const input = document.getElementById('passcode').value.toLowerCase(); 
+            
+            if (input === correctPassword) {
+                try {
+                    // This command (atob) unscrambles the Base64 gibberish
+                    const decodedText = atob(secretData); 
+                    document.getElementById('decrypted-text').innerHTML = decodedText;
+                    
+                    // Hide the terminal login, show the beautiful poem
+                    document.getElementById('login-box').classList.add('hidden');
+                    document.getElementById('poem-container').classList.remove('hidden');
+                    
+                } catch (e) {
+                    alert("Error decrypting file.");
+                }
+            } else {
+                document.getElementById('error-msg').classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
