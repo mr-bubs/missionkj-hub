@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="robots" content="noindex">
+    <title>I'M LOCKED</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- THE PURE BLACK PHONE SCREEN --- */
+        body {
+            background-color: #000000;
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            overflow: hidden; 
+        }
+        
+        .hidden { display: none !important; }
+        .fade-out { opacity: 0; transition: opacity 0.5s ease-out; }
+
+        /* --- THE MAIN UI WRAPPER --- */
+        #main-ui {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- TOP STATUS BAR --- */
+        .status-bar {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 15px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.9);
+            box-sizing: border-box;
+            background-color: black;
+            z-index: 10;
+        }
+
+        .status-left i { margin-right: 5px; font-size: 12px;}
+        .status-time { font-weight: 500; font-size: 15px; }
+        .status-right i { margin-left: 5px; }
+
+        /* --- THE SHERLOCK LAYOUT --- */
+        #lock-screen {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            cursor: pointer; 
+        }
+
+        .sherlock-text {
+            font-family: 'Impact', 'Arial Black', sans-serif; 
+            font-size: 70px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            color: #dcdcdc; 
+            margin: 10px 0;
+            text-transform: uppercase;
+        }
+
+        /* --- THE PASSCODE SQUARES --- */
+        .passcode-row {
+            display: flex;
+            gap: 15px; 
+            margin: 20px 0;
+        }
+
+        .box {
+            width: 65px;
+            height: 75px;
+            background-color: white;
+            color: black;
+            font-size: 45px;
+            font-family: monospace;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid transparent;
+        }
+
+        .box.active { border-color: #3399ff; }
+
+        #hidden-input {
+            position: absolute;
+            opacity: 0;
+            top: -1000px;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            50% { transform: translateX(10px); }
+            75% { transform: translateX(-10px); }
+        }
+        .shake { animation: shake 0.4s ease-in-out; }
+
+        /* --- THE POEM CONTAINER --- */
+        #poem-view {
+            background-color: #E6E0F8; 
+            color: #1a1a1a;
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 15px;
+            box-sizing: border-box;
+            overflow-y: hidden; /* Locked during decryption */
+        }
+
+        #poem-box {
+            font-family: 'Georgia', serif;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            line-height: 1.8;
+            font-size: 16px;
+        }
+
+        #poem-box h1 {
+            font-family: 'Courier New', monospace;
+            margin-bottom: 30px;
+            font-size: 24px;
+            white-space: nowrap;
+        }
+
+        #decrypted-text {
+            text-align: left;
+            display: inline-block;
+            margin: 0 auto;
+            word-wrap: break-word; /* Forces the raw encrypted text to fit the screen */
+            max-width: 100%;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-top: 40px;
+            padding: 10px 20px;
+            background-color: #1a1a1a;
+            color: white;
+            text-decoration: none;
+            font-family: 'Courier New', monospace;
+            border-radius: 5px;
+            margin-bottom: 40px;
+        }
+
+        /* --- THE DECRYPTION OVERLAY --- */
+        #decryption-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); /* Dark cinematic overlay */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: opacity 0.5s ease;
+        }
+
+        .decrypt-box {
+            border: 1px solid #00ff00;
+            background: rgba(0, 25, 0, 0.9);
+            padding: 20px 40px;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 20px;
+            font-weight: bold;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+            text-transform: uppercase;
+        }
+
+        .blinking-dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="main-ui">
+        <div class="status-bar">
+            <div class="status-left">
+                <i class="fas fa-signal"></i> 
+                <i class="fas fa-wifi"></i>
+            </div>
+            <div class="status-time" id="clock">--:--</div>
+            <div class="status-right">
+                66% <i class="fas fa-battery-half"></i>
+            </div>
+        </div>
+
+        <div id="lock-screen">
+            <div class="sherlock-text">I'M</div>
+            <div class="passcode-row" id="box-container">
+                <div class="box" id="box1"></div>
+                <div class="box" id="box2"></div>
+                <div class="box" id="box3"></div>
+                <div class="box" id="box4"></div>
+            </div>
+            <div class="sherlock-text">LOCKED</div>
+            <input type="text" id="hidden-input" maxlength="4" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
+        </div>
+    </div>
+
+
+    <div id="poem-view" class="hidden">
+        
+        <div id="decryption-overlay">
+            <div class="decrypt-box" id="overlay-text">
+                Decrypting<span class="blinking-dots"></span>
+            </div>
+        </div>
+
+        <div id="poem-box">
+            <h1>[ Shitty poem ]</h1>
+            <div id="decrypted-text"></div>
+            <br>
+            <a href="/" class="back-btn">RETURN TO DATABASE</a>
+        </div>
+    </div>
+
+    <script>
+        // --- MISSION KJ SECRETS ---
+        const secretData = "CkFuIGFwcGxlIGEgZGF5PGJyPgpLZWVwcyB0aGUgZG9jdG9yIGF3YXk8YnI+CidXaGVyZSBpcyBoZSBnb2luZyB3aXRoIHRoaXM/Jzxicj4KQXJlbid0IHlvdSB3b25kZXJpbmcsIEtheWpheT88YnI+CkFueXdheS48YnI+IAo8YnI+Ckl0J3MgZ2V0dGluZyBjb2xkZXIgZXZlcnlkYXk8YnI+ClNvIHNpcCBvbiBhIGhvdCBkcmluazxicj4KQW5kIGxldCBtZSB0aGluazxicj4KQ2F1c2UgSSdtIG9uIHRoZSBicmluay4uLjxicj4KLi4uZG9uJ3QgY2xpY2sgb24gYW55IHVua25vd24gbGluayhzKT88YnI+Ckhhbmcgb24sIGhhbmcgb24uPGJyPgpJJ2xsIHRyeSBhZ2Fpbi48YnI+CkEgcGFzdHJ5IGlzIGdvb2Q8YnI+CkJ1dCB0aGUgY2FrZSBjb3VjaCBpcyBiZXR0ZXI8YnI+CkhvdydzIHRoaXMgc2hpdHR5IHBvZW0/PGJyPgpGZWVscyBsaWtlIGEgdHJlbmQgc2V0dGVyLjxicj4KPGJyPgpBbHNvLCBjb25zaWRlciB0aGlzIHNoaXR0eSBwb2VtIGEgbGF0ZSBiZGF5IGdpZnQ8YnI+CkNhdXNlIEkgZGlkbid0IGdpdmUgYW55IG9uIHRoZSBhY3R1YWwgZGF0ZS48YnI+Ck9jdG9iZXIgMTZ0aCwgdG8gYmUgY2xlYXIuPGJyPgpPa2F5LCBkZWVyPzxicj4KKE5vdCBhIHR5cG8pPGJyPiAKPGJyPgpBbnl3YXksIElHSSBUZXJtaW5hbCAyIGlzIERvbWVzdGljLjxicj4KQ2FuIHlvdSBndWVzcyB3aGVyZSBJJ20gZ29pbmcgd2l0aCB0aGlzIG9uZT88YnI+Ck5vPzxicj4KTUFKRVNUSUMuPGJyPgooSGV5IGF0IGxlYXN0IEkgdHJpZWQsIHlvdSB0cnkgcmh5bWluZyBzb21ldGhpbmcgd2l0aCBNYWplc3RpYykuPGJyPgo8YnI+CkJ1dCBzZXJpb3VzbHksPGJyPgpJIGp1c3QgaG9wZSB0aGlzIG1ha2VzIHlvdSBzbWlsZSwgcmVhbGx5PGJyPgpBbmQgbWFrZXMgdGhpcyBkdWxsIHdvcmxkIGEgYml0IGJyaWdodGVyLjxicj4KTGlrZSB0aGUgc3VuPzxicj4KT3IgYSByZWFsbHkgaGlnaCBxdWFsaXR5IGxpZ2h0ZXI/PGJyPgooT2theSwgY29tcGFyaW5nIHlvdSB0byBhIGxpZ2h0ZXIgaXMgd2VpcmQuPGJyPgpDb25zaWRlciB0aGF0IGxpbmUuLi4gZGlzYXBwZWFyZWQuKTxicj4KT2theSBpdCdzIGdldHRpbmcgY29uZnVzaW5nPGJyPgpBbmQgSSdtIGxvc2luZyBteSB3YXk8YnI+CldoYXQgSSdtIHRyeWluZyB0byBzYXk8YnI+CklzPGJyPgpLYXlqYXksIHlvdSBhcmUgY29vbC48YnI+CkFuZCBJJ20gYSBmb29sLjxicj4KQSBjdXRlIGZvb2w/PGJyPgpNYXliZT88YnI+Ck9rYXksIHRoaXMgcG9lbSBpcyBkb25lLjxicj4KSG9wZSB0aGlzIHdhcyBmdW4uPGJyPgpJZiBpdCB3YXNuJ3QsIEknbSBzb3JyeS48YnI+ClBsZWFzZSBkb24ndCBraWxsIG1lLjxicj4K"; 
+        
+        const correctPassword = "bubs"; 
+        // -----------------------
+
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('clock').innerText = `${hours}:${minutes}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        const hiddenInput = document.getElementById('hidden-input');
+        const boxes = [
+            document.getElementById('box1'),
+            document.getElementById('box2'),
+            document.getElementById('box3'),
+            document.getElementById('box4')
+        ];
+
+        document.getElementById('lock-screen').addEventListener('click', () => {
+            hiddenInput.focus();
+        });
+
+        boxes[0].classList.add('active');
+
+        hiddenInput.addEventListener('input', function() {
+            const val = this.value;
+
+            for (let i = 0; i < 4; i++) {
+                if (i < val.length - 1) {
+                    boxes[i].innerText = '*'; 
+                } else if (i === val.length - 1) {
+                    boxes[i].innerText = val[i].toUpperCase(); 
+                } else {
+                    boxes[i].innerText = ''; 
+                }
+                
+                if (i === val.length) {
+                    boxes[i].classList.add('active');
+                } else if (val.length === 4 && i === 3) {
+                    boxes[i].classList.add('active'); 
+                } else {
+                    boxes[i].classList.remove('active');
+                }
+            }
+
+            if (val.length === 4) {
+                setTimeout(() => {
+                    if (val.toLowerCase() === correctPassword) {
+                        unlockPhone();
+                    } else {
+                        wrongPassword();
+                    }
+                }, 250); 
+            }
+        });
+
+        function unlockPhone() {
+            hiddenInput.blur(); 
+            
+            try {
+                const decodedText = atob(secretData); 
+                const textBox = document.getElementById('decrypted-text');
+                
+                // Fade out Lock Screen
+                document.getElementById('main-ui').classList.add('fade-out');
+                
+                setTimeout(() => {
+                    document.getElementById('main-ui').classList.add('hidden');
+                    
+                    // Show the Poem View with the Decryption Overlay active
+                    document.getElementById('poem-view').classList.remove('hidden');
+                    document.body.style.backgroundColor = "#E6E0F8"; 
+                    
+                    // Step 1: Instantly show the raw base64 string
+                    textBox.innerText = secretData;
+                    
+                    // Step 2: After 1.5s, begin the matrix decryption effect
+                    setTimeout(() => {
+                        startDecryptionEffect(decodedText, textBox);
+                    }, 1500);
+
+                }, 500);
+                
+            } catch (e) {
+                alert("Decryption Error.");
+            }
+        }
+
+        function wrongPassword() {
+            boxes[3].innerText = '*';
+            document.getElementById('box-container').classList.add('shake');
+            setTimeout(() => {
+                document.getElementById('box-container').classList.remove('shake');
+                hiddenInput.value = ''; 
+                boxes.forEach(box => {
+                    box.innerText = '';
+                    box.classList.remove('active');
+                });
+                boxes[0].classList.add('active'); 
+            }, 400);
+        }
+
+        // --- THE MATRIX DECRYPTION ENGINE ---
+        function startDecryptionEffect(finalText, textBox) {
+            // Split into words and HTML tags
+            const tokens = finalText.split(/(<[^>]+>|\s+)/);
+            let currentIndex = 0;
+
+            const decryptInterval = setInterval(() => {
+                if (currentIndex >= tokens.length) {
+                    clearInterval(decryptInterval);
+                    
+                    // Finish Sequence
+                    const overlayText = document.getElementById('overlay-text');
+                    overlayText.innerHTML = "DECRYPTION COMPLETED";
+                    
+                    setTimeout(() => {
+                        const overlay = document.getElementById('decryption-overlay');
+                        overlay.style.opacity = '0'; 
+                        
+                        setTimeout(() => {
+                            overlay.classList.add('hidden');
+                            document.getElementById('poem-view').style.overflowY = "auto"; // Re-enable scrolling
+                            document.body.style.overflow = "auto";
+                        }, 500);
+                    }, 1200); // Hold the "Completed" message for a second
+                    
+                    return;
+                }
+
+                // Skip ahead instantly if it's a space or an HTML tag
+                if (tokens[currentIndex].match(/(<[^>]+>|\s+)/)) {
+                    currentIndex++;
+                    if (currentIndex >= tokens.length) return;
+                }
+
+                let revealed = tokens.slice(0, currentIndex + 1).join('');
+
+                // Generate structural gibberish for the unrevealed portion
+                let unrevealedHtml = "";
+                for (let j = currentIndex + 1; j < tokens.length; j++) {
+                    if (tokens[j].match(/(<[^>]+>|\s+)/)) {
+                        unrevealedHtml += tokens[j]; // Keep spaces and line breaks
+                    } else {
+                        unrevealedHtml += generateGibberish(tokens[j].length); // Scramble words
+                    }
+                }
+
+                // Display revealed text in normal color, gibberish slightly faded
+                textBox.innerHTML = revealed + '<span style="opacity: 0.3;">' + unrevealedHtml + '</span>';
+                
+                currentIndex++;
+            }, 50); // Speed of the word-by-word reveal (50ms)
+        }
+
+        function generateGibberish(length) {
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%";
+            let result = "";
+            for (let i = 0; i < length; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+    </script>
+</body>
+</html>
