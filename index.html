@@ -2,311 +2,58 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="robots" content="noindex">
-    <title>I'M LOCKED</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mission KJ</title>
     <style>
-        /* --- THE PURE BLACK PHONE SCREEN --- */
         body {
-            background-color: #000000;
+            background-color: #1a1a1a; /* Dark sleek background */
             color: white;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            font-family: 'Courier New', monospace; /* Typewriter/Terminal font */
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
             margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            overflow: hidden; /* Prevents scroll on lock screen */
         }
         
-        .hidden { display: none !important; }
-        .fade-out { opacity: 0; transition: opacity 0.5s ease-out; }
-
-        /* --- THE MAIN UI WRAPPER --- */
-        #main-ui {
-            width: 100%;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* --- TOP STATUS BAR --- */
-        .status-bar {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 15px;
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.9);
-            box-sizing: border-box;
-            background-color: black;
-            z-index: 10;
-        }
-
-        .status-left i { margin-right: 5px; font-size: 12px;}
-        .status-time { font-weight: 500; font-size: 15px; }
-        .status-right i { margin-left: 5px; }
-
-        /* --- THE SHERLOCK LAYOUT (Perfectly Centered) --- */
-        #lock-screen {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            cursor: pointer; /* Lets them tap anywhere to type */
-        }
-
-        .sherlock-text {
-            font-family: 'Impact', 'Arial Black', sans-serif; /* Big, chunky font */
-            font-size: 70px;
-            font-weight: bold;
-            letter-spacing: 4px;
-            color: #dcdcdc; /* Slightly muted white/grey */
-            margin: 10px 0;
-            text-transform: uppercase;
-        }
-
-        /* --- THE PASSCODE SQUARES --- */
-        .passcode-row {
-            display: flex;
-            gap: 15px; /* Space between boxes */
-            margin: 20px 0;
-        }
-
-        .box {
-            width: 65px;
-            height: 75px;
-            background-color: white;
-            color: black;
-            font-size: 45px;
-            font-family: monospace;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 3px solid transparent;
-        }
-
-        /* The blue highlight for the active box */
-        .box.active {
-            border-color: #3399ff; 
-        }
-
-        /* The actual input field is hidden */
-        #hidden-input {
-            position: absolute;
-            opacity: 0;
-            top: -1000px;
-        }
-
-        /* Error shake animation */
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            50% { transform: translateX(10px); }
-            75% { transform: translateX(-10px); }
-        }
-        .shake { animation: shake 0.4s ease-in-out; }
-
-        /* --- THE POEM CONTAINER (Book Style) --- */
-        #poem-view {
-            background-color: #E6E0F8; 
-            color: #1a1a1a;
-            min-height: 100vh;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 15px;
-            box-sizing: border-box;
-            overflow-y: auto; 
-        }
-
-        #poem-box {
-            font-family: 'Georgia', serif;
-            max-width: 600px;
-            width: 100%;
-            text-align: center;
-            line-height: 1.8;
-            font-size: 16px;
-        }
-
-        #poem-box h1 {
-            font-family: 'Courier New', monospace;
-            margin-bottom: 30px;
-            font-size: 24px;
-            white-space: nowrap;
-        }
-
-        #decrypted-text {
-            text-align: left;
-            display: inline-block;
-            margin: 0 auto;
-        }
-
-        .back-btn {
-            display: inline-block;
-            margin-top: 40px;
-            padding: 10px 20px;
-            background-color: #1a1a1a;
-            color: white;
-            text-decoration: none;
-            font-family: 'Courier New', monospace;
-            border-radius: 5px;
+        h1 {
             margin-bottom: 40px;
+            letter-spacing: 2px;
+        }
+
+        /* The Button Style */
+        .project-btn {
+            display: block;
+            background-color: #E6E0F8; /* The purple from your GIF */
+            color: #1a1a1a;
+            text-decoration: none;
+            padding: 15px 40px;
+            margin: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 10px;
+            transition: transform 0.2s ease;
+            width: 250px;
+        }
+
+        /* Makes the button "squish" slightly when tapped */
+        .project-btn:active {
+            transform: scale(0.95);
         }
     </style>
 </head>
 <body>
 
-    <div id="main-ui">
-        <div class="status-bar">
-            <div class="status-left">
-                <i class="fas fa-signal"></i> 
-                <i class="fas fa-wifi"></i>
-            </div>
-            <div class="status-time" id="clock">--:--</div>
-            <div class="status-right">
-                66% <i class="fas fa-battery-half"></i>
-            </div>
-        </div>
+    <h1>MISSION KJ : DATABASE</h1> 
+    
+   <a href="shitty-poem.html" class="project-btn">Shitty Poem</a>
 
-        <div id="lock-screen">
-            <div class="sherlock-text">I'M</div>
-            
-            <div class="passcode-row" id="box-container">
-                <div class="box" id="box1"></div>
-                <div class="box" id="box2"></div>
-                <div class="box" id="box3"></div>
-                <div class="box" id="box4"></div>
-            </div>
-            
-            <div class="sherlock-text">LOCKED</div>
+    <a href="https://mr-bubs.github.io/good-friday" class="project-btn">Projekt Judas</a>
+    
+    <a href="#" class="project-btn">Classified...</a>
+    <a href="#" class="project-btn">Classified...</a>
 
-            <input type="text" id="hidden-input" maxlength="4" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
-        </div>
-    </div>
-
-    <div id="poem-view" class="hidden">
-        <div id="poem-box">
-            <h1>[ Shitty poem ]</h1>
-            <div id="decrypted-text"></div>
-            <br>
-            <a href="/" class="back-btn">RETURN TO DATABASE</a>
-        </div>
-    </div>
-
-    <script>
-        // --- MISSION KJ SECRETS ---
-        const secretData = "CkFuIGFwcGxlIGEgZGF5PGJyPgpLZWVwcyB0aGUgZG9jdG9yIGF3YXk8YnI+CidXaGVyZSBpcyBoZSBnb2luZyB3aXRoIHRoaXM/Jzxicj4KQXJlbid0IHlvdSB3b25kZXJpbmcsIEtheWpheT88YnI+CkFueXdheS48YnI+IAo8YnI+Ckl0J3MgZ2V0dGluZyBjb2xkZXIgZXZlcnlkYXk8YnI+ClNvIHNpcCBvbiBhIGhvdCBkcmluazxicj4KQW5kIGxldCBtZSB0aGluazxicj4KQ2F1c2UgSSdtIG9uIHRoZSBicmluay4uLjxicj4KLi4uZG9uJ3QgY2xpY2sgb24gYW55IHVua25vd24gbGluayhzKT88YnI+Ckhhbmcgb24sIGhhbmcgb24uPGJyPgpJJ2xsIHRyeSBhZ2Fpbi48YnI+CkEgcGFzdHJ5IGlzIGdvb2Q8YnI+CkJ1dCB0aGUgY2FrZSBjb3VjaCBpcyBiZXR0ZXI8YnI+CkhvdydzIHRoaXMgc2hpdHR5IHBvZW0/PGJyPgpGZWVscyBsaWtlIGEgdHJlbmQgc2V0dGVyLjxicj4KPGJyPgpBbHNvLCBjb25zaWRlciB0aGlzIHNoaXR0eSBwb2VtIGEgbGF0ZSBiZGF5IGdpZnQ8YnI+CkNhdXNlIEkgZGlkbid0IGdpdmUgYW55IG9uIHRoZSBhY3R1YWwgZGF0ZS48YnI+Ck9jdG9iZXIgMTZ0aCwgdG8gYmUgY2xlYXIuPGJyPgpPa2F5LCBkZWVyPzxicj4KKE5vdCBhIHR5cG8pPGJyPiAKPGJyPgpBbnl3YXksIElHSSBUZXJtaW5hbCAyIGlzIERvbWVzdGljLjxicj4KQ2FuIHlvdSBndWVzcyB3aGVyZSBJJ20gZ29pbmcgd2l0aCB0aGlzIG9uZT88YnI+Ck5vPzxicj4KTUFKRVNUSUMuPGJyPgooSGV5IGF0IGxlYXN0IEkgdHJpZWQsIHlvdSB0cnkgcmh5bWluZyBzb21ldGhpbmcgd2l0aCBNYWplc3RpYykuPGJyPgo8YnI+CkJ1dCBzZXJpb3VzbHksPGJyPgpJIGp1c3QgaG9wZSB0aGlzIG1ha2VzIHlvdSBzbWlsZSwgcmVhbGx5PGJyPgpBbmQgbWFrZXMgdGhpcyBkdWxsIHdvcmxkIGEgYml0IGJyaWdodGVyLjxicj4KTGlrZSB0aGUgc3VuPzxicj4KT3IgYSByZWFsbHkgaGlnaCBxdWFsaXR5IGxpZ2h0ZXI/PGJyPgooT2theSwgY29tcGFyaW5nIHlvdSB0byBhIGxpZ2h0ZXIgaXMgd2VpcmQuPGJyPgpDb25zaWRlciB0aGF0IGxpbmUuLi4gZGlzYXBwZWFyZWQuKTxicj4KT2theSBpdCdzIGdldHRpbmcgY29uZnVzaW5nPGJyPgpBbmQgSSdtIGxvc2luZyBteSB3YXk8YnI+CldoYXQgSSdtIHRyeWluZyB0byBzYXk8YnI+CklzPGJyPgpLYXlqYXksIHlvdSBhcmUgY29vbC48YnI+CkFuZCBJJ20gYSBmb29sLjxicj4KQSBjdXRlIGZvb2w/PGJyPgpNYXliZT88YnI+Ck9rYXksIHRoaXMgcG9lbSBpcyBkb25lLjxicj4KSG9wZSB0aGlzIHdhcyBmdW4uPGJyPgpJZiBpdCB3YXNuJ3QsIEknbSBzb3JyeS48YnI+ClBsZWFzZSBkb24ndCBraWxsIG1lLjxicj4K"; 
-        
-        const correctPassword = "bubs"; 
-        // -----------------------
-
-        // Update the tiny clock automatically
-        function updateClock() {
-            const now = new Date();
-            const hours = now.getHours().toString().padStart(2, '0');
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            document.getElementById('clock').innerText = `${hours}:${minutes}`;
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
-
-        // --- THE INVISIBLE KEYBOARD LOGIC ---
-        const hiddenInput = document.getElementById('hidden-input');
-        const boxes = [
-            document.getElementById('box1'),
-            document.getElementById('box2'),
-            document.getElementById('box3'),
-            document.getElementById('box4')
-        ];
-
-        // Tapping anywhere on the black screen opens the keyboard
-        document.getElementById('lock-screen').addEventListener('click', () => {
-            hiddenInput.focus();
-        });
-
-        // Initialize first box to have the blue active border
-        boxes[0].classList.add('active');
-
-        hiddenInput.addEventListener('input', function() {
-            const val = this.value;
-
-            for (let i = 0; i < 4; i++) {
-                // Determine what character to show in the box
-                if (i < val.length - 1) {
-                    boxes[i].innerText = '*'; // Mask previous letters
-                } else if (i === val.length - 1) {
-                    boxes[i].innerText = val[i].toUpperCase(); // Show current letter in caps
-                } else {
-                    boxes[i].innerText = ''; // Empty box
-                }
-                
-                // Move the blue border to the current box
-                if (i === val.length) {
-                    boxes[i].classList.add('active');
-                } else if (val.length === 4 && i === 3) {
-                    boxes[i].classList.add('active'); // Keep last box active when full
-                } else {
-                    boxes[i].classList.remove('active');
-                }
-            }
-
-            // Check password when 4 letters are typed
-            if (val.length === 4) {
-                // Short delay so they can actually see the final typed letter before it verifies
-                setTimeout(() => {
-                    if (val.toLowerCase() === correctPassword) {
-                        unlockPhone();
-                    } else {
-                        wrongPassword();
-                    }
-                }, 250); 
-            }
-        });
-
-        function unlockPhone() {
-            hiddenInput.blur(); 
-            
-            try {
-                // Decrypt
-                const decodedText = atob(secretData); 
-                document.getElementById('decrypted-text').innerHTML = decodedText;
-                
-                // Fade out UI, show poem
-                document.getElementById('main-ui').classList.add('fade-out');
-                setTimeout(() => {
-                    document.getElementById('main-ui').classList.add('hidden');
-                    document.getElementById('poem-view').classList.remove('hidden');
-                    document.body.style.overflow = "auto"; 
-                    document.body.style.backgroundColor = "#E6E0F8"; // Change background for scrolling
-                }, 500);
-                
-            } catch (e) {
-                alert("Decryption Error.");
-            }
-        }
-
-        function wrongPassword() {
-            // Instantly turn the final wrong letter into an asterisk before shaking
-            boxes[3].innerText = '*';
-            
-            // Shake effect
-            document.getElementById('box-container').classList.add('shake');
-            setTimeout(() => {
-                document.getElementById('box-container').classList.remove('shake');
-                hiddenInput.value = ''; // Clear input
-                // Reset visual boxes
-                boxes.forEach(box => {
-                    box.innerText = '';
-                    box.classList.remove('active');
-                });
-                boxes[0].classList.add('active'); // Reset blue border to start
-            }, 400);
-        }
-    </script>
 </body>
 </html>
