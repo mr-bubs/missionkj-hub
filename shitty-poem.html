@@ -4,156 +4,249 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex">
-    <title>Classified File</title>
-        <style>
-        /* Terminal Background */
+    <title>I'm _ _ _ _ locked</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- THE PHONE SCREEN BASE --- */
         body {
-            background-color: #0d0d0d;
-            color: #00ff00; /* Hacker Green */
-            font-family: 'Courier New', monospace;
+            background-color: #000;
+            background-image: linear-gradient(to bottom, #2c2c2c, #000000);
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            padding: 15px; /* Gives the whole page a little breathing room */
-            box-sizing: border-box;
+            padding: 0;
+            overflow: hidden; 
         }
         
         .hidden { display: none !important; }
+        .fade-out { opacity: 0; transition: opacity 0.5s ease-out; }
 
-        /* The Login Box */
-        #login-box {
-            border: 1px solid #00ff00;
-            padding: 30px 20px;
-            text-align: center;
-            box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+        /* --- THE LOCK SCREEN UI --- */
+        #lock-screen {
             width: 100%;
-            max-width: 400px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
             box-sizing: border-box;
-        }
-
-        input[type="password"] {
-            background: #1a1a1a;
-            border: 1px solid #00ff00;
-            color: #00ff00;
-            padding: 10px;
-            font-family: 'Courier New', monospace;
-            margin-top: 20px;
-            outline: none;
             text-align: center;
-            width: 80%; /* Fits better on small screens */
         }
 
-        button {
-            background: #00ff00;
-            color: #0d0d0d;
+        /* Status Bar (Time/Date) */
+        .status-bar { margin-top: 40px; }
+        .time { font-size: 80px; font-weight: 200; margin: 0; line-height: 1; }
+        .date { font-size: 22px; font-weight: 400; margin-top: 10px; opacity: 0.8; }
+
+        /* The Sherlock Input Area */
+        .sherlock-container {
+            font-size: 32px;
+            font-weight: 500;
+            margin-bottom: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #sherlock-input {
+            background: transparent;
             border: none;
-            padding: 10px 20px;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: transform 0.1s;
+            color: white;
+            font-size: 32px;
+            font-family: inherit;
+            font-weight: 500;
+            width: 110px; 
+            text-align: center;
+            letter-spacing: 8px; 
+            margin: 0 5px;
+            outline: none;
+            caret-color: white; 
+        }
+        
+        ::placeholder { 
+            color: rgba(255,255,255,0.3); 
+            letter-spacing: 8px; 
+            font-weight: 300;
         }
 
-        button:active { transform: scale(0.95); }
-        #error-msg { color: #ff3333; margin-top: 15px; font-size: 14px; }
+        /* Bottom Icons */
+        .bottom-controls {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 30px;
+            margin-bottom: 30px;
+        }
+        .control-icon {
+            width: 50px;
+            height: 50px;
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+        }
 
-        /* The Poem Container */
-        #poem-container {
+        /* Error shake animation */
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            50% { transform: translateX(10px); }
+            75% { transform: translateX(-10px); }
+            100% { transform: translateX(0); }
+        }
+        .shake { animation: shake 0.3s ease-in-out; }
+
+        /* --- THE POEM CONTAINER --- */
+        #poem-view {
             background-color: #E6E0F8; 
             color: #1a1a1a;
-            font-family: 'Georgia', serif;
-            padding: 40px 15px; /* <--- FIXED: Much less side padding for mobile */
-            border-radius: 10px;
-            width: 100%; /* <--- FIXED: Allows it to fill the screen */
-            max-width: 600px;
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 15px;
             box-sizing: border-box;
+            overflow-y: auto; 
+        }
+
+        #poem-box {
+            font-family: 'Georgia', serif;
+            max-width: 600px;
+            width: 100%;
             text-align: center;
             line-height: 1.8;
-            font-size: 16px; /* <--- FIXED: Slightly smaller for narrow screens */
-            box-shadow: 0 0 30px rgba(230, 224, 248, 0.2);
+            font-size: 16px;
         }
 
         h1 {
             font-family: 'Courier New', monospace;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
             font-size: 24px;
-            white-space: nowrap; /* <--- FIXED: Forces the brackets to stay on one line */
+            white-space: nowrap;
         }
 
-        .back-btn {
-            display: inline-block;
-            margin-top: 30px;
-            padding: 10px 20px;
-            background-color: #1a1a1a;
-            color: white;
-            text-decoration: none;
-            font-family: 'Courier New', monospace;
-            border-radius: 5px;
-        } 
-            /* Aligns the poem text to the left, but keeps the block centered */
         #decrypted-text {
             text-align: left;
             display: inline-block;
             margin: 0 auto;
         }
 
+        .back-btn {
+            display: inline-block;
+            margin-top: 40px;
+            padding: 10px 20px;
+            background-color: #1a1a1a;
+            color: white;
+            text-decoration: none;
+            font-family: 'Courier New', monospace;
+            border-radius: 5px;
+            margin-bottom: 40px;
+        }
     </style>
-
 </head>
 <body>
 
-    <div id="login-box">
-        <h2>MISSION KJ : SECURE ARCHIVE</h2>
-        <p>File: "Shitty_Poem.txt" is encrypted.</p>
-        <p>Enter Clearance Code to decrypt:</p>
-        <input type="password" id="passcode" placeholder="Code...">
-        <br>
-        <button onclick="checkCode()">DECRYPT FILE</button>
-        <p id="error-msg" class="hidden">ACCESS DENIED. INCORRECT CODE.</p>
+    <div id="lock-screen">
+        <div class="status-bar">
+            <h1 class="time" id="clock">--:--</h1>
+            <h2 class="date" id="date">Loading...</h2>
+        </div>
+
+        <div class="sherlock-container">
+            <span>I'm </span>
+            <input type="text" id="sherlock-input" maxlength="4" placeholder="_ _ _ _" autocomplete="off">
+            <span> locked</span>
+        </div>
+
+        <div class="bottom-controls">
+            <div class="control-icon"><i class="fas fa-bolt"></i></div>
+            <div class="control-icon"><i class="fas fa-camera"></i></div>
+        </div>
     </div>
 
-    <div id="poem-container" class="hidden">
-        <h1 style="font-family: 'Courier New', monospace;">[ Shitty poem ]</h1>
-        
-        <div id="decrypted-text"></div>
-        
-        <a href="/" class="back-btn">RETURN TO DATABASE</a>
+    <div id="poem-view" class="hidden">
+        <div id="poem-box">
+            <h1>[ Shitty poem ]</h1>
+            <div id="decrypted-text"></div>
+            <br>
+            <a href="/" class="back-btn">RETURN TO DATABASE</a>
+        </div>
     </div>
 
     <script>
-        // --- MISSION KJ SETTINGS ---
-
-        // 1. PASTE YOUR GIBBERISH HERE (Keep the quote marks!)
+        // --- MISSION KJ SECRETS ---
         const secretData = "CkFuIGFwcGxlIGEgZGF5PGJyPgpLZWVwcyB0aGUgZG9jdG9yIGF3YXk8YnI+CidXaGVyZSBpcyBoZSBnb2luZyB3aXRoIHRoaXM/Jzxicj4KQXJlbid0IHlvdSB3b25kZXJpbmcsIEtheWpheT88YnI+CkFueXdheS48YnI+IAo8YnI+Ckl0J3MgZ2V0dGluZyBjb2xkZXIgZXZlcnlkYXk8YnI+ClNvIHNpcCBvbiBhIGhvdCBkcmluazxicj4KQW5kIGxldCBtZSB0aGluazxicj4KQ2F1c2UgSSdtIG9uIHRoZSBicmluay4uLjxicj4KLi4uZG9uJ3QgY2xpY2sgb24gYW55IHVua25vd24gbGluayhzKT88YnI+Ckhhbmcgb24sIGhhbmcgb24uPGJyPgpJJ2xsIHRyeSBhZ2Fpbi48YnI+CkEgcGFzdHJ5IGlzIGdvb2Q8YnI+CkJ1dCB0aGUgY2FrZSBjb3VjaCBpcyBiZXR0ZXI8YnI+CkhvdydzIHRoaXMgc2hpdHR5IHBvZW0/PGJyPgpGZWVscyBsaWtlIGEgdHJlbmQgc2V0dGVyLjxicj4KPGJyPgpBbHNvLCBjb25zaWRlciB0aGlzIHNoaXR0eSBwb2VtIGEgbGF0ZSBiZGF5IGdpZnQ8YnI+CkNhdXNlIEkgZGlkbid0IGdpdmUgYW55IG9uIHRoZSBhY3R1YWwgZGF0ZS48YnI+Ck9jdG9iZXIgMTZ0aCwgdG8gYmUgY2xlYXIuPGJyPgpPa2F5LCBkZWVyPzxicj4KKE5vdCBhIHR5cG8pPGJyPiAKPGJyPgpBbnl3YXksIElHSSBUZXJtaW5hbCAyIGlzIERvbWVzdGljLjxicj4KQ2FuIHlvdSBndWVzcyB3aGVyZSBJJ20gZ29pbmcgd2l0aCB0aGlzIG9uZT88YnI+Ck5vPzxicj4KTUFKRVNUSUMuPGJyPgooSGV5IGF0IGxlYXN0IEkgdHJpZWQsIHlvdSB0cnkgcmh5bWluZyBzb21ldGhpbmcgd2l0aCBNYWplc3RpYykuPGJyPgo8YnI+CkJ1dCBzZXJpb3VzbHksPGJyPgpJIGp1c3QgaG9wZSB0aGlzIG1ha2VzIHlvdSBzbWlsZSwgcmVhbGx5PGJyPgpBbmQgbWFrZXMgdGhpcyBkdWxsIHdvcmxkIGEgYml0IGJyaWdodGVyLjxicj4KTGlrZSB0aGUgc3VuPzxicj4KT3IgYSByZWFsbHkgaGlnaCBxdWFsaXR5IGxpZ2h0ZXI/PGJyPgooT2theSwgY29tcGFyaW5nIHlvdSB0byBhIGxpZ2h0ZXIgaXMgd2VpcmQuPGJyPgpDb25zaWRlciB0aGF0IGxpbmUuLi4gZGlzYXBwZWFyZWQuKTxicj4KT2theSBpdCdzIGdldHRpbmcgY29uZnVzaW5nPGJyPgpBbmQgSSdtIGxvc2luZyBteSB3YXk8YnI+CldoYXQgSSdtIHRyeWluZyB0byBzYXk8YnI+CklzPGJyPgpLYXlqYXksIHlvdSBhcmUgY29vbC48YnI+CkFuZCBJJ20gYSBmb29sLjxicj4KQSBjdXRlIGZvb2w/PGJyPgpNYXliZT88YnI+Ck9rYXksIHRoaXMgcG9lbSBpcyBkb25lLjxicj4KSG9wZSB0aGlzIHdhcyBmdW4uPGJyPgpJZiBpdCB3YXNuJ3QsIEknbSBzb3JyeS48YnI+ClBsZWFzZSBkb24ndCBraWxsIG1lLjxicj4K"; 
         
-        // 2. SET YOUR PASSWORD HERE (Keep it lowercase in the code)
-        const correctPassword = "1995"; 
+        const correctPassword = "bubs"; 
+        // -----------------------
 
-        // ---------------------------
+        const inputField = document.getElementById('sherlock-input');
+        const lockScreen = document.getElementById('lock-screen');
+        const poemView = document.getElementById('poem-view');
 
-        function checkCode() {
-            const input = document.getElementById('passcode').value.toLowerCase(); 
-            
-            if (input === correctPassword) {
-                try {
-                    // This command (atob) unscrambles the Base64 gibberish
-                    const decodedText = atob(secretData); 
-                    document.getElementById('decrypted-text').innerHTML = decodedText;
-                    
-                    // Hide the terminal login, show the beautiful poem
-                    document.getElementById('login-box').classList.add('hidden');
-                    document.getElementById('poem-container').classList.remove('hidden');
-                    
-                } catch (e) {
-                    alert("Error decrypting file.");
+        // Auto-Check Password Logic
+        inputField.addEventListener('input', function() {
+            const guess = this.value.toLowerCase();
+
+            if (guess.length === 4) {
+                if (guess === correctPassword) {
+                    unlockPhone();
+                } else {
+                    wrongPassword();
                 }
-            } else {
-                document.getElementById('error-msg').classList.remove('hidden');
+            }
+        });
+
+        function unlockPhone() {
+            inputField.blur(); 
+            
+            try {
+                // Decrypt the poem
+                const decodedText = atob(secretData); 
+                document.getElementById('decrypted-text').innerHTML = decodedText;
+                
+                // Fade out lock screen
+                lockScreen.classList.add('fade-out');
+                setTimeout(() => {
+                    lockScreen.classList.add('hidden');
+                    poemView.classList.remove('hidden');
+                    document.body.style.overflow = "auto"; 
+                }, 500);
+                
+            } catch (e) {
+                alert("Decryption Error. Check encoded text.");
             }
         }
+
+        function wrongPassword() {
+            document.querySelector('.sherlock-container').classList.add('shake');
+            setTimeout(() => {
+                document.querySelector('.sherlock-container').classList.remove('shake');
+                inputField.value = '';
+            }, 500);
+        }
+
+        // Real-Time Clock & Date Logic
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours() % 12 || 12;
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('clock').innerText = `${hours}:${minutes}`;
+            
+            const options = { weekday: 'long', month: 'long', day: 'numeric' };
+            document.getElementById('date').innerText = now.toLocaleDateString(undefined, options);
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
     </script>
 </body>
 </html>
