@@ -88,5 +88,41 @@ function handleNo() {
 
 
 function handleYes() {
+    // Transition to the final scene
     nextScene(6);
+
+    // Target Scene 6 and grab its image element
+    const scene6 = document.getElementById('scene6');
+    const img = scene6.querySelector('img');
+    
+    // Hide any existing text inside Scene 6 so the GIF plays completely silently
+    const textElements = scene6.querySelectorAll('h1, h2, p, span');
+    textElements.forEach(el => {
+        el.style.display = 'none'; 
+    });
+
+    // 1. Play the silent mask removal GIF
+    img.src = "mask-removal.gif";
+
+    // 2. The 3-Second Punchline Delay (3000 milliseconds)
+    setTimeout(() => {
+        // Swap to the cartoon avatar
+        img.src = "my-avatar.png";
+        
+        // Create the final message
+        const punchline = document.createElement('h2');
+        punchline.innerHTML = "Hehe got you. Now you're stuck with me.";
+        
+        // Add a little styling to make it look clean and centered above the image
+        punchline.style.fontFamily = "'Courier New', monospace";
+        punchline.style.fontSize = "22px";
+        punchline.style.marginBottom = "20px";
+        punchline.style.textAlign = "center";
+        
+        // Insert the text exactly at the top of the image
+        scene6.insertBefore(punchline, img);
+        
+    }, 3000);
+}
+
 }
