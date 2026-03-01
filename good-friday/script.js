@@ -1,11 +1,9 @@
 let noClickCount = 0;
 
 function nextScene(sceneNumber) {
-    // Hide all scenes
     document.querySelectorAll('.scene').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.scene').forEach(el => el.classList.add('hidden'));
 
-    // Show the requested scene
     const next = document.getElementById(`scene${sceneNumber}`);
     next.classList.remove('hidden');
     next.classList.add('active');
@@ -31,8 +29,8 @@ function handleNo() {
     yesBtn.classList.add('hidden');
     noBtn.classList.add('hidden');
 
-    // Show Yosemite Sam (Updated to the new, foolproof filename)
-    mainImg.src = "sam.png"; 
+    // Show Yosemite Sam (Reverted to match your exact screenshot filename)
+    mainImg.src = "yosemite-sam.png"; 
     mainImg.style.width = "350px"; 
     samDialogue.classList.remove('hidden');
 
@@ -84,11 +82,10 @@ function handleYes() {
     // Reset the image source so the GIF is forced to play from Frame 1
     img.src = ""; 
 
-    // A tiny 50ms pause lets the browser catch its breath before firing the GIF
     setTimeout(() => {
         img.src = "mask-reveal.gif";
         
-        // NOW start the precise 3-second stopwatch
+        // NOW wait exactly 5 seconds before dropping the punchline
         setTimeout(() => {
             img.src = "my-avatar.png";
 
@@ -101,7 +98,7 @@ function handleYes() {
             punchline.style.fontWeight = "bold";
 
             scene6.appendChild(punchline);
-        }, 3000); 
+        }, 5000); // <-- Changed to 5000ms (5 seconds)
 
     }, 50);
 }
