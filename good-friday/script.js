@@ -29,8 +29,8 @@ function handleNo() {
     yesBtn.classList.add('hidden');
     noBtn.classList.add('hidden');
 
-    // Show Yosemite Sam (Reverted to match your exact screenshot filename)
-    mainImg.src = "yosemite-sam.png"; 
+    // THE CACHE BUSTER: The ?v=2 forces the phone to download the fresh Sam!
+    mainImg.src = "yosemite-sam.png?v=2"; 
     mainImg.style.width = "350px"; 
     samDialogue.classList.remove('hidden');
 
@@ -46,8 +46,8 @@ function handleNo() {
     setTimeout(() => {
         samDialogue.classList.add('hidden');
 
-        // Prepare Cartoon Yoongi
-        mainImg.src = "yoongi-cartoon.png";
+        // CACHE BUSTER for Yoongi
+        mainImg.src = "yoongi-cartoon.png?v=2";
         mainImg.style.width = "100%"; 
         mainImg.classList.add('hidden'); 
 
@@ -79,15 +79,15 @@ function handleYes() {
         el.style.display = 'none'; 
     });
 
-    // Reset the image source so the GIF is forced to play from Frame 1
     img.src = ""; 
 
     setTimeout(() => {
-        img.src = "mask-reveal.gif";
+        // CACHE BUSTER for the GIF
+        img.src = "mask-reveal.gif?v=2";
         
-        // NOW wait exactly 5 seconds before dropping the punchline
         setTimeout(() => {
-            img.src = "my-avatar.png";
+            // CACHE BUSTER for the Avatar
+            img.src = "my-avatar.png?v=2";
 
             const punchline = document.createElement('div');
             punchline.innerHTML = "Hehe got you. Now you're stuck with me.";
@@ -98,7 +98,7 @@ function handleYes() {
             punchline.style.fontWeight = "bold";
 
             scene6.appendChild(punchline);
-        }, 5000); // <-- Changed to 5000ms (5 seconds)
+        }, 5000); 
 
     }, 50);
 }
