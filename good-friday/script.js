@@ -28,7 +28,7 @@ function handleNo() {
     const scene5 = document.getElementById('scene5');
 
     // --- PHASE 1: YOSEMITE SAM TAKEOVER ---
-    
+
     // 1. Hide the Question and Buttons immediately
     questionText.classList.add('hidden');
     yesBtn.classList.add('hidden');
@@ -52,25 +52,25 @@ function handleNo() {
     setTimeout(() => {
         // 1. Remove Sam and his dialogue
         samDialogue.classList.add('hidden');
-        
+
         // 2. Prepare Cartoon Yoongi (Hidden initially)
         mainImg.src = "yoongi-cartoon.png";
         mainImg.style.width = "100%"; 
         mainImg.classList.add('hidden'); 
-        
+
         // 3. Activate the "Split Layout" (Left/Right positioning)
         scene5.classList.add('split-layout');
 
         // --- THE REVEAL STEPS ---
-        
+
         // Step A: Bring back the Question (Immediately)
         questionText.classList.remove('hidden');
-        
+
         // Step B: Bring in Yoongi AND Yes Button (Together, 1s later)
         setTimeout(() => {
             // Show Yoongi
             mainImg.classList.remove('hidden');
-            
+
             // Show Yes Button
             yesBtn.classList.remove('hidden');
             yesBtn.style.transformOrigin = "top right";
@@ -85,8 +85,6 @@ function handleNo() {
     }, 4000); // End of Yosemite Sam time
 }
 
-
-
 function handleYes() {
     // Transition to the final scene
     nextScene(6);
@@ -94,35 +92,33 @@ function handleYes() {
     // Target Scene 6 and grab its image element
     const scene6 = document.getElementById('scene6');
     const img = scene6.querySelector('img');
-    
+
     // Hide any existing text inside Scene 6 so the GIF plays completely silently
-    const textElements = scene6.querySelectorAll('h1, h2, p, span');
+    const textElements = scene6.querySelectorAll('h1, h2, p, span, .dialogue-box');
     textElements.forEach(el => {
         el.style.display = 'none'; 
     });
 
     // 1. Play the silent mask removal GIF
-    img.src = "mask-removal.gif";
+    img.src = "mask-reveal.gif";
 
     // 2. The 3-Second Punchline Delay (3000 milliseconds)
     setTimeout(() => {
         // Swap to the cartoon avatar
         img.src = "my-avatar.png";
-        
+
         // Create the final message
         const punchline = document.createElement('h2');
         punchline.innerHTML = "Hehe got you. Now you're stuck with me.";
-        
+
         // Add a little styling to make it look clean and centered above the image
         punchline.style.fontFamily = "'Courier New', monospace";
         punchline.style.fontSize = "22px";
         punchline.style.marginBottom = "20px";
         punchline.style.textAlign = "center";
-        
+
         // Insert the text exactly at the top of the image
         scene6.insertBefore(punchline, img);
-        
-    }, 3000);
-}
 
+    }, 3000);
 }
