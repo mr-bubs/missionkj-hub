@@ -55,23 +55,6 @@
     </div>
 
     <script src="script.js"></script> 
-        <script>
-        // Wait for the main menu to load first, so we don't slow down the Hub
-        window.onload = function() {
-            const secretAssets = [
-                "/good-friday/mask-reveal.gif",
-                "/good-friday/yosemite-sam.png",
-                "/good-friday/yoongi-cartoon.png",
-                "/good-friday/my-avatar.png"
-            ];
-            
-            // Silently download them into the browser's cache
-            secretAssets.forEach(src => {
-                const img = new Image();
-                img.src = src;
-            });
-        };
-        </script>
     
 </body>
 </html>
