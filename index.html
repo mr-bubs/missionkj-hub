@@ -46,7 +46,7 @@
 </head>
 <body>
 
-    <h1>MISSION KJ : DATABASE</h1> 
+    <h1>MISSION KJ DATABASE</h1> 
     
    <a href="shitty-poem.html" class="project-btn">Shitty Poem</a>
 
@@ -55,6 +55,21 @@
     
     <a href="#" class="project-btn">Classified...</a>
     <a href="#" class="project-btn">Classified...</a>
-
+       <script>
+        window.onload = function() {
+            const secretAssets = [
+                "/good-friday/mask-reveal.gif?v=2",
+                "/good-friday/yosemite-sam.png?v=2",
+                "/good-friday/yoongi-cartoon.png?v=2",
+                "/good-friday/my-avatar.png?v=2"
+            ];
+            
+            secretAssets.forEach(src => {
+                const img = new Image();
+                img.src = src;
+            });
+        };
+       </script>
+    
 </body>
 </html>
