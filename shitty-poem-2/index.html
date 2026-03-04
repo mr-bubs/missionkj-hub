@@ -2,34 +2,132 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="robots" content="noindex">
     <title>Shitty Poem Vol. 2</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* --- THE PURE BLACK PHONE SCREEN --- */
         body {
-            background-color: #1a1a1a; /* Dark database background */
-            color: #dcdcdc;
-            font-family: 'Courier New', monospace;
+            background-color: #000000;
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            overflow: hidden; /* Prevents scroll on lock screen */
+        }
+        
+        .hidden { display: none !important; }
+        .fade-out { opacity: 0; transition: opacity 0.5s ease-out; }
+
+        /* --- THE MAIN UI WRAPPER --- */
+        #main-ui {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- TOP STATUS BAR --- */
+        .status-bar {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 15px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.9);
+            box-sizing: border-box;
+            background-color: black;
+            z-index: 10;
+        }
+
+        .status-left i { margin-right: 5px; font-size: 12px;}
+        .status-time { font-weight: 500; font-size: 15px; }
+        .status-right i { margin-left: 5px; }
+
+        /* --- THE SHERLOCK LAYOUT --- */
+        #lock-screen {
+            flex-grow: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            width: 100%;
+            cursor: pointer; 
+        }
+
+        .sherlock-text {
+            font-family: 'Impact', 'Arial Black', sans-serif; 
+            font-size: 70px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            color: #dcdcdc; 
+            margin: 10px 0;
+            text-transform: uppercase;
+        }
+
+        /* --- THE PASSCODE SQUARES --- */
+        .passcode-row {
+            display: flex;
+            gap: 15px; 
+            margin: 20px 0;
+        }
+
+        .box {
+            width: 65px;
+            height: 75px;
+            background-color: white;
+            color: black;
+            font-size: 45px;
+            font-family: monospace;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid transparent;
+        }
+
+        .box.active { border-color: #3399ff; }
+
+        #hidden-input {
+            position: absolute;
+            opacity: 0;
+            top: -1000px;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            50% { transform: translateX(10px); }
+            75% { transform: translateX(-10px); }
+        }
+        .shake { animation: shake 0.4s ease-in-out; }
+
+        /* --- THE VIDEO CONTAINER --- */
+        #video-view {
+            color: #dcdcdc;
+            font-family: 'Courier New', monospace;
             min-height: 100vh;
-            margin: 0;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             padding: 20px;
             box-sizing: border-box;
         }
-        
-        h1 {
+
+        #video-view h1 {
             font-size: 22px;
             margin-bottom: 30px;
             text-align: center;
             letter-spacing: 2px;
         }
 
-        /* The Video Player Styling */
         video {
             max-width: 100%;
-            width: 350px; /* Perfect size for mobile screens */
+            width: 350px; 
             border: 2px solid #333;
             border-radius: 8px;
             background-color: #000;
@@ -51,15 +149,133 @@
 </head>
 <body>
 
-    <h1>[ Shitty poem Vol. 2 ]</h1>
+    <div id="main-ui">
+        <div class="status-bar">
+            <div class="status-left">
+                <i class="fas fa-signal"></i> 
+                <i class="fas fa-wifi"></i>
+            </div>
+            <div class="status-time" id="clock">--:--</div>
+            <div class="status-right">
+                66% <i class="fas fa-battery-half"></i>
+            </div>
+        </div>
 
-    <video controls playsinline>
-        <source src="rahanahijata.mp4" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
+        <div id="lock-screen">
+            <div class="sherlock-text">I'M</div>
+            <div class="passcode-row" id="box-container">
+                <div class="box" id="box1"></div>
+                <div class="box" id="box2"></div>
+                <div class="box" id="box3"></div>
+                <div class="box" id="box4"></div>
+            </div>
+            <div class="sherlock-text">LOCKED</div>
+            <input type="text" id="hidden-input" maxlength="4" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
+        </div>
+    </div>
 
-    <a href="/" class="back-btn">RETURN TO DATABASE</a>
+    <div id="video-view" class="hidden">
+        <h1>[ Shitty poem Vol. 2 ]</h1>
+        
+        <video controls playsinline>
+            <source src="rahanahijata.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
 
+        <a href="/" class="back-btn">RETURN TO DATABASE</a>
+    </div>
+
+    <script>
+        const correctPassword = "bubs"; 
+
+        // Update the tiny clock automatically
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('clock').innerText = `${hours}:${minutes}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        const hiddenInput = document.getElementById('hidden-input');
+        const boxes = [
+            document.getElementById('box1'),
+            document.getElementById('box2'),
+            document.getElementById('box3'),
+            document.getElementById('box4')
+        ];
+
+        document.getElementById('lock-screen').addEventListener('click', () => {
+            hiddenInput.focus();
+        });
+
+        boxes[0].classList.add('active');
+
+        hiddenInput.addEventListener('input', function() {
+            const val = this.value;
+
+            for (let i = 0; i < 4; i++) {
+                if (i < val.length - 1) {
+                    boxes[i].innerText = '*'; 
+                } else if (i === val.length - 1) {
+                    boxes[i].innerText = val[i].toUpperCase(); 
+                } else {
+                    boxes[i].innerText = ''; 
+                }
+                
+                if (i === val.length) {
+                    boxes[i].classList.add('active');
+                } else if (val.length === 4 && i === 3) {
+                    boxes[i].classList.add('active'); 
+                } else {
+                    boxes[i].classList.remove('active');
+                }
+            }
+
+            if (val.length === 4) {
+                setTimeout(() => {
+                    if (val.toLowerCase() === correctPassword) {
+                        unlockPhone();
+                    } else {
+                        wrongPassword();
+                    }
+                }, 250); 
+            }
+        });
+
+        function unlockPhone() {
+            hiddenInput.blur(); 
+            
+            // Fade out Lock Screen
+            document.getElementById('main-ui').classList.add('fade-out');
+            
+            setTimeout(() => {
+                // Hide the lock screen entirely
+                document.getElementById('main-ui').classList.add('hidden');
+                
+                // Show the Video View instantly (no decryption effect)
+                document.getElementById('video-view').classList.remove('hidden');
+                
+                // Change background from pitch black to dark database grey
+                document.body.style.backgroundColor = "#1a1a1a"; 
+                document.body.style.overflow = "auto"; // Re-enable scrolling if needed
+            }, 500);
+        }
+
+        function wrongPassword() {
+            boxes[3].innerText = '*';
+            document.getElementById('box-container').classList.add('shake');
+            setTimeout(() => {
+                document.getElementById('box-container').classList.remove('shake');
+                hiddenInput.value = ''; 
+                boxes.forEach(box => {
+                    box.innerText = '';
+                    box.classList.remove('active');
+                });
+                boxes[0].classList.add('active'); 
+            }, 400);
+        }
+    </script>
 </body>
 </html>
-
