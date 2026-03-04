@@ -7,12 +7,6 @@ function nextScene(sceneNumber) {
     const next = document.getElementById(`scene${sceneNumber}`);
     next.classList.remove('hidden');
     next.classList.add('active');
-
-    if (sceneNumber === 4) {
-        setTimeout(() => {
-            document.getElementById('yoongi-reveal').classList.remove('hidden-content');
-        }, 2000); 
-    }
 }
 
 function handleNo() {
@@ -22,14 +16,15 @@ function handleNo() {
     const mainImg = document.getElementById('main-character');
     const samDialogue = document.getElementById('sam-dialogue');
     const questionText = document.getElementById('question-text');
-    const scene5 = document.getElementById('scene5');
+    
+    // BUMPED UP TO SCENE 6
+    const scene6 = document.getElementById('scene6'); 
 
     // Hide Question and Buttons immediately
     questionText.classList.add('hidden');
     yesBtn.classList.add('hidden');
     noBtn.classList.add('hidden');
 
-    // THE CACHE BUSTER: The ?v=2 forces the phone to download the fresh Sam!
     mainImg.src = "yosemite-sam.png?v=2"; 
     mainImg.style.width = "350px"; 
     samDialogue.classList.remove('hidden');
@@ -46,12 +41,11 @@ function handleNo() {
     setTimeout(() => {
         samDialogue.classList.add('hidden');
 
-        // CACHE BUSTER for Yoongi
         mainImg.src = "yoongi-cartoon.png?v=2";
         mainImg.style.width = "100%"; 
         mainImg.classList.add('hidden'); 
 
-        scene5.classList.add('split-layout');
+        scene6.classList.add('split-layout');
         questionText.classList.remove('hidden');
 
         setTimeout(() => {
@@ -69,24 +63,23 @@ function handleNo() {
 }
 
 function handleYes() {
-    nextScene(6);
+    // BUMPED UP TO SCENE 7
+    nextScene(7);
 
-    const scene6 = document.getElementById('scene6');
-    const img = scene6.querySelector('img');
+    const scene7 = document.getElementById('scene7');
+    const img = scene7.querySelector('img');
 
     // Hide old text immediately
-    scene6.querySelectorAll('h1, h2, p, span, .dialogue-box').forEach(el => {
+    scene7.querySelectorAll('h1, h2, p, span, .dialogue-box').forEach(el => {
         el.style.display = 'none'; 
     });
 
     img.src = ""; 
 
     setTimeout(() => {
-        // CACHE BUSTER for the GIF
         img.src = "mask-reveal.gif?v=2";
         
         setTimeout(() => {
-            // CACHE BUSTER for the Avatar
             img.src = "my-avatar.png?v=2";
 
             const punchline = document.createElement('div');
@@ -97,7 +90,7 @@ function handleYes() {
             punchline.style.textAlign = "center";
             punchline.style.fontWeight = "bold";
 
-            scene6.appendChild(punchline);
+            scene7.appendChild(punchline);
         }, 5000); 
 
     }, 50);
