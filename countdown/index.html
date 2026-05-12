@@ -3,10 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Countdown</title>
+    <title>Classified Countdown</title>
     <style>
+        /* CSS Variables handle the perfect scaling for desktop vs mobile */
+        :root {
+            --digit-w: 55px;
+            --digit-h: 80px;
+            --digit-font: 3.5rem;
+            --bg-color: #0a0a0a;
+            --card-top: #2a2a2a;
+            --card-bot: #1a1a1a;
+        }
+
         body {
-            background-color: #0a0a0a;
+            background-color: var(--bg-color);
             color: #fff;
             display: flex;
             flex-direction: column;
@@ -18,7 +28,6 @@
             overflow: hidden;
         }
 
-        /* --- THE CLOCK LAYOUT --- */
         .clock {
             display: flex;
             align-items: center;
@@ -28,16 +37,15 @@
 
         .group {
             display: flex;
-            gap: 4px; /* Space between the two digits in a pair */
+            gap: 4px;
         }
 
-        /* --- THE COLONS --- */
         .colon {
-            font-size: 3.5rem;
+            font-size: var(--digit-font);
             font-weight: bold;
             color: #555;
-            margin-bottom: 8px; 
-            animation: blink 1s infinite; /* Makes the colon tick */
+            margin-bottom: 8px;
+            animation: blink 1s infinite;
         }
 
         @keyframes blink {
@@ -45,96 +53,108 @@
             51%, 100% { opacity: 0; }
         }
 
-        /* --- THE MECHANICAL FLAPS --- */
+        /* --- 3D DIGIT CONTAINER --- */
         .digit {
             position: relative;
-            width: 55px;
-            height: 80px;
-            background: linear-gradient(to bottom, #2a2a2a 0%, #111 100%);
+            width: var(--digit-w);
+            height: var(--digit-h);
+            background-color: #000;
             border-radius: 6px;
-            font-size: 3.5rem;
+            font-size: var(--digit-font);
             font-weight: bold;
-            text-align: center;
-            line-height: 80px;
             color: #f0f0f0;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.9), inset 0 2px 2px rgba(255,255,255,0.1);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.9);
+            perspective: 1000px; /* Crucial for 3D depth */
         }
 
-        /* The horizontal split line cutting the card in half */
-        .digit::after {
-            content: '';
+        /* --- CARD HALVES --- */
+        .half {
             position: absolute;
-            top: 50%;
             left: 0;
             width: 100%;
-            height: 2px;
-            background-color: #000;
-            transform: translateY(-50%);
-            z-index: 5;
-            box-shadow: 0 1px 1px rgba(255,255,255,0.1);
+            height: 50%;
+            background-color: var(--card-top);
+            overflow: hidden;
+            text-align: center;
+            border-radius: 6px;
+            transform-style: preserve-3d;
+            backface-visibility: hidden;
         }
 
-        /* The side hinges */
+        .half-top {
+            top: 0;
+            line-height: var(--digit-h);
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+            transform-origin: bottom;
+            background: linear-gradient(to bottom, #333 0%, #1a1a1a 100%);
+        }
+
+        .half-bottom {
+            bottom: 0;
+            line-height: 0;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+            transform-origin: top;
+            background: linear-gradient(to bottom, #1a1a1a 0%, #111 100%);
+        }
+
+        /* The physical mechanical hinge */
         .digit::before {
             content: '';
             position: absolute;
             top: 50%;
             left: -2px;
-            width: 59px; /* Slightly wider than the card */
-            height: 8px;
-            border-left: 2px solid #333;
-            border-right: 2px solid #333;
+            width: calc(100% + 4px);
+            height: 2px;
+            background-color: #000;
             transform: translateY(-50%);
-            z-index: 6;
+            z-index: 10;
         }
 
-        /* --- THE FLIP ANIMATION --- */
-        .flip {
-            /* Uses a rapid vertical scale to perfectly simulate a card folding over */
-            animation: flapFold 0.4s ease-in-out;
+        /* --- THE 3D FLIP ANIMATIONS --- */
+        .flap-top {
+            z-index: 5;
+            animation: flipTop 0.25s ease-in forwards;
         }
 
-        @keyframes flapFold {
-            0% { transform: scaleY(1); filter: brightness(1); }
-            50% { transform: scaleY(0); filter: brightness(0.2); } /* Folds flat and gets shadowed */
-            100% { transform: scaleY(1); filter: brightness(1); }
+        .flap-bottom {
+            z-index: 5;
+            transform: rotateX(90deg); /* Starts folded up, invisible */
+            animation: flipBottom 0.25s ease-out 0.25s forwards;
         }
 
-        /* --- TEXT LABELS (DAYS, HOURS, ETC) --- */
+        @keyframes flipTop {
+            0% { transform: rotateX(0deg); filter: brightness(1); }
+            100% { transform: rotateX(-90deg); filter: brightness(0.2); } /* Folds down and gets shadowed */
+        }
+
+        @keyframes flipBottom {
+            0% { transform: rotateX(90deg); filter: brightness(0.2); }
+            100% { transform: rotateX(0deg); filter: brightness(1); }
+        }
+
+        /* --- LABELS --- */
         .labels {
             display: flex;
             gap: 15px;
             margin-top: 15px;
         }
-        .label {
-            width: 114px; /* Matches the width of a 2-digit group + gap */
-            text-align: center;
-            font-size: 0.8rem;
-            color: #666;
-            letter-spacing: 2px;
-        }
-        .colon-space { width: 15px; /* Matches the colon gap */ }
+        .label { width: calc((var(--digit-w) * 2) + 4px); text-align: center; font-size: 0.8rem; color: #666; letter-spacing: 2px; }
+        .label-days { width: calc((var(--digit-w) * 4) + 12px); text-align: center; font-size: 0.8rem; color: #666; letter-spacing: 2px; }
+        .colon-space { width: 15px; }
 
-        /* --- RETURN BUTTON --- */
-        .back-btn {
-            margin-top: 50px;
-            padding: 10px 20px;
-            background-color: #000;
-            color: #dcdcdc;
-            text-decoration: none;
-            border: 1px solid #333;
-            border-radius: 5px;
-            transition: 0.3s;
-        }
+        .back-btn { margin-top: 50px; padding: 10px 20px; background-color: #000; color: #dcdcdc; text-decoration: none; border: 1px solid #333; border-radius: 5px; transition: 0.3s; }
 
         /* --- MOBILE RESPONSIVENESS --- */
-        @media (max-width: 600px) {
-            .clock { gap: 8px; }
-            .group { gap: 2px; }
-            .digit { width: 35px; height: 50px; font-size: 2.2rem; line-height: 50px; }
-            .colon { font-size: 2.5rem; margin-bottom: 5px; }
-            .labels { gap: 8px; }
-            .label { width: 72px; font-size: 0.6rem; }
+        @media (max-width: 768px) {
+            :root {
+                --digit-w: 30px;
+                --digit-h: 45px;
+                --digit-font: 1.8rem;
+            }
+            .clock { gap: 6px; }
+            .labels { gap: 6px; }
             .colon-space { width: 8px; }
         }
     </style>
@@ -143,34 +163,36 @@
 
     <div class="clock">
         <div class="group">
-            <div class="digit" id="d-tens">0</div>
-            <div class="digit" id="d-ones">0</div>
+            <div class="digit" id="d-thou" data-value="0"><div class="half half-top static-top">0</div><div class="half half-bottom static-bottom">0</div></div>
+            <div class="digit" id="d-hund" data-value="0"><div class="half half-top static-top">0</div><div class="half half-bottom static-bottom">0</div></div>
+            <div class="digit" id="d-tens" data-value="0"><div class="half half-top static-top">0</div><div class="half half-bottom static-bottom">0</div></div>
+            <div class="digit" id="d-ones" data-value="0"><div class="half half-top static-top">0</div><div class="half half-bottom static-bottom">0</div></div>
         </div>
         
         <div class="colon">:</div>
         
         <div class="group">
-            <div class="digit" id="h-tens">0</div>
-            <div class="digit" id="h-ones">0</div>
-        </div>
-
-        <div class="colon">:</div>
-        
-        <div class="group">
-            <div class="digit" id="m-tens">0</div>
-            <div class="digit" id="m-ones">0</div>
+            <div class="digit" id="h-tens" data-value="0"><div class="half half-top static-top">0</div><div class="half half-bottom static-bottom">0</div></div>
+            <div class="digit" id="h-ones" data-value="0"><div class="half half-top static-top">0</div><div class="half half-bottom static-bottom">0</div></div>
         </div>
 
         <div class="colon">:</div>
         
         <div class="group">
-            <div class="digit" id="s-tens">0</div>
-            <div class="digit" id="s-ones">0</div>
+            <div class="digit" id="m-tens" data-value="0"><div class="half half-top static-top">0</div><div class="half half-bottom static-bottom">0</div></div>
+            <div class="digit" id="m-ones" data-value="0"><div class="half half-top static-top">0</div><div class="half half-bottom static-bottom">0</div></div>
+        </div>
+
+        <div class="colon">:</div>
+        
+        <div class="group">
+            <div class="digit" id="s-tens" data-value="0"><div class="half half-top static-top">0</div><div class="half half-bottom static-bottom">0</div></div>
+            <div class="digit" id="s-ones" data-value="0"><div class="half half-top static-top">0</div><div class="half half-bottom static-bottom">0</div></div>
         </div>
     </div>
 
     <div class="labels">
-        <div class="label">DAYS</div>
+        <div class="label-days">DAYS</div>
         <div class="colon-space"></div>
         <div class="label">HRS</div>
         <div class="colon-space"></div>
@@ -183,42 +205,57 @@
 
     <script>
         // ==============================================================
-        // CONFIGURATION: SET YOUR TARGET DATE HERE
-        // Format: "YYYY-MM-DDTHH:MM:SS"
+        // TARGET DATE
         // ==============================================================
-        const TARGET_DATE = "2027-01-01T00:00:00"; 
+        const TARGET_DATE = "2029-02-09T00:00:00"; 
 
         let isFirstLoad = true;
 
-        // Breaks a number like "18" into ["1", "8"]
-        function splitNum(num) {
-            return String(num).padStart(2, '0').split('');
-        }
+        function splitNum(num) { return String(num).padStart(2, '0').split(''); }
+        function splitDays(num) { return String(num).padStart(4, '0').split(''); }
 
-        // Handles the physical folding animation
-        function updateDigit(id, newValue) {
+        // The core physics engine of the flip
+        function flipTo(id, newValue) {
             const el = document.getElementById(id);
-            
-            // Only trigger the animation if the number actually changed
-            if (el.innerText !== newValue) {
-                if (isFirstLoad) {
-                    // Don't animate on the very first page load
-                    el.innerText = newValue;
-                } else {
-                    // Strip the old animation class and force the browser to reset
-                    el.classList.remove('flip');
-                    void el.offsetWidth; 
-                    
-                    // Add the flip animation back
-                    el.classList.add('flip');
-                    
-                    // Change the actual number exactly halfway through the animation 
-                    // when the flap is folded flat and invisible (200ms)
-                    setTimeout(() => {
-                        el.innerText = newValue;
-                    }, 200); 
-                }
+            const currentValue = el.getAttribute('data-value');
+
+            // If it's the very first page load, just set the numbers silently without animating
+            if (isFirstLoad) {
+                el.setAttribute('data-value', newValue);
+                el.querySelector('.static-top').innerText = newValue;
+                el.querySelector('.static-bottom').innerText = newValue;
+                return;
             }
+
+            if (currentValue === String(newValue)) return;
+
+            el.setAttribute('data-value', newValue);
+
+            const staticTop = el.querySelector('.static-top');
+            const staticBottom = el.querySelector('.static-bottom');
+
+            // Create the top half that falls forward
+            const flapTop = document.createElement('div');
+            flapTop.className = 'half half-top flap-top';
+            flapTop.innerText = currentValue;
+
+            // Create the bottom half that catches the fall
+            const flapBottom = document.createElement('div');
+            flapBottom.className = 'half half-bottom flap-bottom';
+            flapBottom.innerText = newValue;
+
+            // Change background top instantly
+            staticTop.innerText = newValue;
+
+            el.appendChild(flapTop);
+            el.appendChild(flapBottom);
+
+            // Wait exactly 500ms for both 0.25s CSS animations to finish, then clean up
+            setTimeout(() => {
+                staticBottom.innerText = newValue;
+                flapTop.remove();
+                flapBottom.remove();
+            }, 500); 
         }
 
         function updateDisplay() {
@@ -235,29 +272,28 @@
                 s = Math.floor((difference % (1000 * 60)) / 1000);
             }
 
-            // Split the math into tens and ones
-            const [dTens, dOnes] = splitNum(d);
+            const [dThou, dHund, dTens, dOnes] = splitDays(d);
             const [hTens, hOnes] = splitNum(h);
             const [mTens, mOnes] = splitNum(m);
             const [sTens, sOnes] = splitNum(s);
 
-            // Send each digit to its specific flap
-            updateDigit('d-tens', dTens);
-            updateDigit('d-ones', dOnes);
+            flipTo('d-thou', dThou);
+            flipTo('d-hund', dHund);
+            flipTo('d-tens', dTens);
+            flipTo('d-ones', dOnes);
             
-            updateDigit('h-tens', hTens);
-            updateDigit('h-ones', hOnes);
+            flipTo('h-tens', hTens);
+            flipTo('h-ones', hOnes);
             
-            updateDigit('m-tens', mTens);
-            updateDigit('m-ones', mOnes);
+            flipTo('m-tens', mTens);
+            flipTo('m-ones', mOnes);
             
-            updateDigit('s-tens', sTens);
-            updateDigit('s-ones', sOnes);
+            flipTo('s-tens', sTens);
+            flipTo('s-ones', sOnes);
 
             isFirstLoad = false;
         }
 
-        // Start the engine
         updateDisplay();
         setInterval(updateDisplay, 1000);
     </script>
