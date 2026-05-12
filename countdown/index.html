@@ -3,82 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Get Ready</title>
+    <title>Countdown</title>
     <style>
-        /* Base page styling for absolute minimalism */
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
+        body {
             background-color: #0a0a0a;
+            color: #fff;
             display: flex;
-            flex-direction: column; /* Changed to column to stack timer and button */
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            font-family: 'Courier New', Courier, monospace;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Courier New', monospace;
             overflow: hidden;
         }
 
-        .split-flap-container {
+        /* --- THE CLOCK LAYOUT --- */
+        .clock {
             display: flex;
-            gap: 20px;
-        }
-
-        /* The mechanical flap design */
-        .flap {
-            position: relative;
-            width: 140px;
-            height: 180px;
-            /* Gradient creates the 3D lighting and the mechanical split in the middle */
-            background: linear-gradient(
-                to bottom,
-                #2a2a2a 0%,
-                #111111 48%,
-                #000000 48%,
-                #000000 52%,
-                #2a2a2a 52%,
-                #111111 100%
-            );
-            color: #f0f0f0;
-            font-size: 6rem;
-            font-weight: bold;
-            display: flex;
-            justify-content: center;
             align-items: center;
-            border-radius: 8px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.9), inset 0 2px 2px rgba(255,255,255,0.05);
-            text-shadow: 0 3px 6px rgba(0,0,0,0.8);
+            justify-content: center;
+            gap: 15px;
         }
 
-        /* Left hinge */
-        .flap::before {
+        .group {
+            display: flex;
+            gap: 4px; /* Space between the two digits in a pair */
+        }
+
+        /* --- THE COLONS --- */
+        .colon {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 8px; 
+            animation: blink 1s infinite; /* Makes the colon tick */
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        /* --- THE MECHANICAL FLAPS --- */
+        .digit {
+            position: relative;
+            width: 55px;
+            height: 80px;
+            background: linear-gradient(to bottom, #2a2a2a 0%, #111 100%);
+            border-radius: 6px;
+            font-size: 3.5rem;
+            font-weight: bold;
+            text-align: center;
+            line-height: 80px;
+            color: #f0f0f0;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.9), inset 0 2px 2px rgba(255,255,255,0.1);
+        }
+
+        /* The horizontal split line cutting the card in half */
+        .digit::after {
             content: '';
             position: absolute;
             top: 50%;
-            left: -5px;
-            width: 5px;
-            height: 16px;
-            background-color: #333;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: #000;
             transform: translateY(-50%);
-            border-radius: 3px 0 0 3px;
+            z-index: 5;
+            box-shadow: 0 1px 1px rgba(255,255,255,0.1);
         }
 
-        /* Right hinge */
-        .flap::after {
+        /* The side hinges */
+        .digit::before {
             content: '';
             position: absolute;
             top: 50%;
-            right: -5px;
-            width: 5px;
-            height: 16px;
-            background-color: #333;
+            left: -2px;
+            width: 59px; /* Slightly wider than the card */
+            height: 8px;
+            border-left: 2px solid #333;
+            border-right: 2px solid #333;
             transform: translateY(-50%);
-            border-radius: 0 3px 3px 0;
+            z-index: 6;
         }
 
-        /* The Return Button */
+        /* --- THE FLIP ANIMATION --- */
+        .flip {
+            /* Uses a rapid vertical scale to perfectly simulate a card folding over */
+            animation: flapFold 0.4s ease-in-out;
+        }
+
+        @keyframes flapFold {
+            0% { transform: scaleY(1); filter: brightness(1); }
+            50% { transform: scaleY(0); filter: brightness(0.2); } /* Folds flat and gets shadowed */
+            100% { transform: scaleY(1); filter: brightness(1); }
+        }
+
+        /* --- TEXT LABELS (DAYS, HOURS, ETC) --- */
+        .labels {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .label {
+            width: 114px; /* Matches the width of a 2-digit group + gap */
+            text-align: center;
+            font-size: 0.8rem;
+            color: #666;
+            letter-spacing: 2px;
+        }
+        .colon-space { width: 15px; /* Matches the colon gap */ }
+
+        /* --- RETURN BUTTON --- */
         .back-btn {
-            margin-top: 60px;
+            margin-top: 50px;
             padding: 10px 20px;
             background-color: #000;
             color: #dcdcdc;
@@ -88,36 +127,99 @@
             transition: 0.3s;
         }
 
-        /* Responsive scaling for mobile devices */
-        @media (max-width: 768px) {
-            .split-flap-container {
-                gap: 10px;
-            }
-            .flap {
-                width: 70px;
-                height: 100px;
-                font-size: 2.5rem;
-            }
+        /* --- MOBILE RESPONSIVENESS --- */
+        @media (max-width: 600px) {
+            .clock { gap: 8px; }
+            .group { gap: 2px; }
+            .digit { width: 35px; height: 50px; font-size: 2.2rem; line-height: 50px; }
+            .colon { font-size: 2.5rem; margin-bottom: 5px; }
+            .labels { gap: 8px; }
+            .label { width: 72px; font-size: 0.6rem; }
+            .colon-space { width: 8px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="split-flap-container">
-        <div class="flap" id="days">00</div>
-        <div class="flap" id="hours">00</div>
-        <div class="flap" id="minutes">00</div>
-        <div class="flap" id="seconds">00</div>
+    <div class="clock">
+        <div class="group">
+            <div class="digit" id="d-tens">0</div>
+            <div class="digit" id="d-ones">0</div>
+        </div>
+        
+        <div class="colon">:</div>
+        
+        <div class="group">
+            <div class="digit" id="h-tens">0</div>
+            <div class="digit" id="h-ones">0</div>
+        </div>
+
+        <div class="colon">:</div>
+        
+        <div class="group">
+            <div class="digit" id="m-tens">0</div>
+            <div class="digit" id="m-ones">0</div>
+        </div>
+
+        <div class="colon">:</div>
+        
+        <div class="group">
+            <div class="digit" id="s-tens">0</div>
+            <div class="digit" id="s-ones">0</div>
+        </div>
+    </div>
+
+    <div class="labels">
+        <div class="label">DAYS</div>
+        <div class="colon-space"></div>
+        <div class="label">HRS</div>
+        <div class="colon-space"></div>
+        <div class="label">MINS</div>
+        <div class="colon-space"></div>
+        <div class="label">SECS</div>
     </div>
 
     <a href="/" class="back-btn">RETURN TO DATABASE</a>
 
     <script>
         // ==============================================================
-        // CONFIGURATION: CHANGE YOUR TARGET DATE AND TIME HERE
-        // Format strictly as: "YYYY-MM-DDTHH:MM:SS"
+        // CONFIGURATION: SET YOUR TARGET DATE HERE
+        // Format: "YYYY-MM-DDTHH:MM:SS"
         // ==============================================================
-        const TARGET_DATE = "2029-02-09T00:00:00"; // Feel free to change this date!
+        const TARGET_DATE = "2027-01-01T00:00:00"; 
+
+        let isFirstLoad = true;
+
+        // Breaks a number like "18" into ["1", "8"]
+        function splitNum(num) {
+            return String(num).padStart(2, '0').split('');
+        }
+
+        // Handles the physical folding animation
+        function updateDigit(id, newValue) {
+            const el = document.getElementById(id);
+            
+            // Only trigger the animation if the number actually changed
+            if (el.innerText !== newValue) {
+                if (isFirstLoad) {
+                    // Don't animate on the very first page load
+                    el.innerText = newValue;
+                } else {
+                    // Strip the old animation class and force the browser to reset
+                    el.classList.remove('flip');
+                    void el.offsetWidth; 
+                    
+                    // Add the flip animation back
+                    el.classList.add('flip');
+                    
+                    // Change the actual number exactly halfway through the animation 
+                    // when the flap is folded flat and invisible (200ms)
+                    setTimeout(() => {
+                        el.innerText = newValue;
+                    }, 200); 
+                }
+            }
+        }
 
         function updateDisplay() {
             const targetTime = new Date(TARGET_DATE).getTime();
@@ -133,14 +235,29 @@
                 s = Math.floor((difference % (1000 * 60)) / 1000);
             }
 
-            // Update DOM and ensure numbers are always two digits
-            document.getElementById('days').innerText = String(d).padStart(2, '0');
-            document.getElementById('hours').innerText = String(h).padStart(2, '0');
-            document.getElementById('minutes').innerText = String(m).padStart(2, '0');
-            document.getElementById('seconds').innerText = String(s).padStart(2, '0');
+            // Split the math into tens and ones
+            const [dTens, dOnes] = splitNum(d);
+            const [hTens, hOnes] = splitNum(h);
+            const [mTens, mOnes] = splitNum(m);
+            const [sTens, sOnes] = splitNum(s);
+
+            // Send each digit to its specific flap
+            updateDigit('d-tens', dTens);
+            updateDigit('d-ones', dOnes);
+            
+            updateDigit('h-tens', hTens);
+            updateDigit('h-ones', hOnes);
+            
+            updateDigit('m-tens', mTens);
+            updateDigit('m-ones', mOnes);
+            
+            updateDigit('s-tens', sTens);
+            updateDigit('s-ones', sOnes);
+
+            isFirstLoad = false;
         }
 
-        // Run immediately to prevent layout shift, then loop every 1 second
+        // Start the engine
         updateDisplay();
         setInterval(updateDisplay, 1000);
     </script>
