@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Countdown Timer</title>
+    <style>
+        /* Base page styling for absolute minimalism */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-color: #0a0a0a;
+            display: flex;
+            flex-direction: column; /* Changed to column to stack timer and button */
+            justify-content: center;
+            align-items: center;
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+        }
+
+        .split-flap-container {
+            display: flex;
+            gap: 20px;
+        }
+
+        /* The mechanical flap design */
+        .flap {
+            position: relative;
+            width: 140px;
+            height: 180px;
+            /* Gradient creates the 3D lighting and the mechanical split in the middle */
+            background: linear-gradient(
+                to bottom,
+                #2a2a2a 0%,
+                #111111 48%,
+                #000000 48%,
+                #000000 52%,
+                #2a2a2a 52%,
+                #111111 100%
+            );
+            color: #f0f0f0;
+            font-size: 6rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 8px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.9), inset 0 2px 2px rgba(255,255,255,0.05);
+            text-shadow: 0 3px 6px rgba(0,0,0,0.8);
+        }
+
+        /* Left hinge */
+        .flap::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: -5px;
+            width: 5px;
+            height: 16px;
+            background-color: #333;
+            transform: translateY(-50%);
+            border-radius: 3px 0 0 3px;
+        }
+
+        /* Right hinge */
+        .flap::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -5px;
+            width: 5px;
+            height: 16px;
+            background-color: #333;
+            transform: translateY(-50%);
+            border-radius: 0 3px 3px 0;
+        }
+
+        /* The Return Button */
+        .back-btn {
+            margin-top: 60px;
+            padding: 10px 20px;
+            background-color: #000;
+            color: #dcdcdc;
+            text-decoration: none;
+            border: 1px solid #333;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        /* Responsive scaling for mobile devices */
+        @media (max-width: 768px) {
+            .split-flap-container {
+                gap: 10px;
+            }
+            .flap {
+                width: 70px;
+                height: 100px;
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="split-flap-container">
+        <div class="flap" id="days">00</div>
+        <div class="flap" id="hours">00</div>
+        <div class="flap" id="minutes">00</div>
+        <div class="flap" id="seconds">00</div>
+    </div>
+
+    <a href="/" class="back-btn">RETURN TO DATABASE</a>
+
+    <script>
+        // ==============================================================
+        // CONFIGURATION: CHANGE YOUR TARGET DATE AND TIME HERE
+        // Format strictly as: "YYYY-MM-DDTHH:MM:SS"
+        // ==============================================================
+        const TARGET_DATE = "2029-02-09T00:00:00"; // Feel free to change this date!
+
+        function updateDisplay() {
+            const targetTime = new Date(TARGET_DATE).getTime();
+            const now = new Date().getTime();
+            const difference = targetTime - now;
+
+            let d = 0, h = 0, m = 0, s = 0;
+
+            if (difference > 0) {
+                d = Math.floor(difference / (1000 * 60 * 60 * 24));
+                h = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                m = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+                s = Math.floor((difference % (1000 * 60)) / 1000);
+            }
+
+            // Update DOM and ensure numbers are always two digits
+            document.getElementById('days').innerText = String(d).padStart(2, '0');
+            document.getElementById('hours').innerText = String(h).padStart(2, '0');
+            document.getElementById('minutes').innerText = String(m).padStart(2, '0');
+            document.getElementById('seconds').innerText = String(s).padStart(2, '0');
+        }
+
+        // Run immediately to prevent layout shift, then loop every 1 second
+        updateDisplay();
+        setInterval(updateDisplay, 1000);
+    </script>
+
+</body>
+</html>
